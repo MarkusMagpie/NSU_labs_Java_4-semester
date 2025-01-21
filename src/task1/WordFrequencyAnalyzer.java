@@ -4,7 +4,35 @@ import java.io.*;
 import java.util.*;
 
 public class WordFrequencyAnalyzer {
-    public static void main(String[] args) {
+    public static int fillWordFrequency(Reader reader, HashMap<String, Integer> word_frequency) throws IOException {
+        int word_count = 0;
+        StringBuilder sb = new StringBuilder(); // для построения слов и записи слов в word_frequency
+        int current_char;
+
+        // read symbols from input file once at a time
+        while ((current_char = reader.read()) != -1) {
+            char c = (char) current_char;
+
+            if (Character.isLetterOrDigit(c)) {
+                sb.append(Character.toLowerCase(c));
+            } else if (!sb.isEmpty()) { // если символ - разделитель, то увеличиваем на 1 частоту этого слова в Map
+                String word = sb.toString().toLowerCase(); // переводим полученную строку из StringBuilder в нижний регистр
+                word_frequency.put(word, word_frequency.getOrDefault(word, 0) + 1);
+                word_count++;
+                sb.setLength(0); // очищаем StringBuilder
+            }
+        }
+
+        if (!sb.isEmpty()) {
+            String word = sb.toString().toLowerCase();
+            word_frequency.put(word, word_frequency.getOrDefault(word, 0) + 1);
+            word_count++;
+        }
+
+        return word_count;
+    }
+
+    public static void analyze(String[] args) { // static - метод принадлежит не объекту класса, а самому классу!
         // проверка что на входе 1 аргумент
         if (args.length != 1) {
             System.out.println("Ошибка: неверное количество аргументов.");
@@ -17,28 +45,7 @@ public class WordFrequencyAnalyzer {
 
         // открываем входной файл и читаем его
         try (Reader reader = new InputStreamReader(new FileInputStream(input_file))) {
-            StringBuilder sb = new StringBuilder(); // для построения слов и записи слов в word_frequency
-            int current_char;
-
-            // read symbols from input file once at a time
-            while ((current_char = reader.read()) != -1) {
-                char c = (char) current_char;
-
-                if (Character.isLetterOrDigit(c)) {
-                    sb.append(Character.toLowerCase(c));
-                } else if (!sb.isEmpty()) { // если символ - разделитель, то увеличиваем на 1 частоту этого слова в Map
-                    String word = sb.toString().toLowerCase(); // переводим полученную строку из StringBuilder в нижний регистр
-                    word_frequency.put(word, word_frequency.getOrDefault(word, 0) + 1);
-                    word_count++;
-                    sb.setLength(0); // очищаем StringBuilder
-                }
-            }
-
-            if (!sb.isEmpty()) {
-                String word = sb.toString().toLowerCase();
-                word_frequency.put(word, word_frequency.getOrDefault(word, 0) + 1);
-                word_count++;
-            }
+            word_count = fillWordFrequency(reader, word_frequency);
         } catch (IOException e) {
             System.out.println("Ошибка при чтении из файла: " + e.getMessage());
             return;
