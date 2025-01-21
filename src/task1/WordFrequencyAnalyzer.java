@@ -4,8 +4,16 @@ import java.io.*;
 import java.util.*;
 
 public class WordFrequencyAnalyzer {
-    public static int fillWordFrequency(Reader reader, HashMap<String, Integer> word_frequency) throws IOException {
-        int word_count = 0;
+    private final HashMap<String, Integer> word_frequency;
+    private int word_count;
+
+    // конструктор
+    public WordFrequencyAnalyzer() {
+        this.word_frequency = new HashMap<>();
+        this.word_count = 0;
+    }
+
+    public void FillWordFrequency(Reader reader, HashMap<String, Integer> word_frequency) throws IOException {
         StringBuilder sb = new StringBuilder(); // для построения слов и записи слов в word_frequency
         int current_char;
 
@@ -28,24 +36,19 @@ public class WordFrequencyAnalyzer {
             word_frequency.put(word, word_frequency.getOrDefault(word, 0) + 1);
             word_count++;
         }
-
-        return word_count;
     }
 
-    public static void analyze(String[] args) { // static - метод принадлежит не объекту класса, а самому классу!
-        // проверка что на входе 1 аргумент
+    public void Analyze(String[] args) { // static - метод принадлежит не объекту класса, а самому классу!
         if (args.length != 1) {
             System.out.println("Ошибка: неверное количество аргументов.");
             return;
         }
 
         String input_file = args[0];
-        HashMap<String, Integer> word_frequency = new HashMap<>(); // diamond operator
-        int word_count = 0;
 
         // открываем входной файл и читаем его
         try (Reader reader = new InputStreamReader(new FileInputStream(input_file))) {
-            word_count = fillWordFrequency(reader, word_frequency);
+            FillWordFrequency(reader, word_frequency);
         } catch (IOException e) {
             System.out.println("Ошибка при чтении из файла: " + e.getMessage());
             return;

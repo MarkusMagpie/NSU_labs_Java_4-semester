@@ -7,6 +7,7 @@ public class Main {
 //        String test = "abc";
 
         // создаём экземпляр WordFrequencyAnalyzer и вызываем его метод
-        WordFrequencyAnalyzer.analyze(new String[]{fileName}); // всегда 1 входной параметр так что смысла в 1 проверке нет
+        WordFrequencyAnalyzer analyzer = new WordFrequencyAnalyzer();
+        analyzer.Analyze(new String[]{fileName});
     }
 }
