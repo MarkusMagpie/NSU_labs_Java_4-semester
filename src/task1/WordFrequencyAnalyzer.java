@@ -12,12 +12,12 @@ public class WordFrequencyAnalyzer {
         }
 
         String input_file = args[0];
-        Map<String, Integer> word_frequency = new HashMap<>();
+        HashMap<String, Integer> word_frequency = new HashMap<>(); // diamond operator
         int word_count = 0;
 
         // открываем входной файл и читаем его
         try (Reader reader = new InputStreamReader(new FileInputStream(input_file))) {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(); // для построения слов и записи слов в word_frequency
             int current_char;
 
             // read symbols from input file once at a time
@@ -26,7 +26,7 @@ public class WordFrequencyAnalyzer {
 
                 if (Character.isLetterOrDigit(c)) {
                     sb.append(Character.toLowerCase(c));
-                } else if (!sb.isEmpty()) {
+                } else if (!sb.isEmpty()) { // если символ - разделитель, то увеличиваем на 1 частоту этого слова в Map
                     String word = sb.toString().toLowerCase(); // переводим полученную строку из StringBuilder в нижний регистр
                     word_frequency.put(word, word_frequency.getOrDefault(word, 0) + 1);
                     word_count++;
@@ -45,8 +45,8 @@ public class WordFrequencyAnalyzer {
         }
 
         // создаем список из Map.Entry<String, Integer> и сортируем его в порядке убывания
-        List<Map.Entry<String, Integer>> sorted_words = new ArrayList<>(word_frequency.entrySet());
-        sorted_words.sort((e1, e2) -> Integer.compare(e2.getValue(), e1.getValue()));
+        List<Map.Entry<String, Integer>> sorted_words = new ArrayList<>(word_frequency.entrySet()); // entrySet возвращает Set всех элементов Map (пар)
+        sorted_words.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
 
         // создаем выходной CSV файл
         String output_file = "src\\task1\\output.csv";
