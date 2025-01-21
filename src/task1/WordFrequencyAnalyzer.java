@@ -9,8 +9,8 @@ public class WordFrequencyAnalyzer {
 
     // конструктор
     public WordFrequencyAnalyzer() {
-        this.word_frequency = new HashMap<>();
-        this.word_count = 0;
+        word_frequency = new HashMap<>();
+        word_count = 0;
     }
 
     public void FillWordFrequency(Reader reader, HashMap<String, Integer> word_frequency) throws IOException {
