@@ -1,6 +1,7 @@
 package commands;
 
 import org.junit.jupiter.api.Test;
+
 import task2.ExecutionContext;
 import task2.commands.SubCommand;
 
@@ -13,7 +14,7 @@ public class SubCommandTest {
         ExecutionContext context = new ExecutionContext();
         SubCommand subCommand = new SubCommand();
 
-        // сначала кладу 5 затем 3, когда я извлеку то будет 5 - 3 = 2
+        // firstly push 5 and then 3, when I pop, it will be 5 - 3 = 2
         context.GetStack().push(5.0);
         context.GetStack().push(3.0);
 

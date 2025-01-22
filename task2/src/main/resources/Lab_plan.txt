@@ -3,13 +3,16 @@ src/
  - Command.java             // абстрактный класс команды
  - CommandFactory.java      // фабрика команд
  - commands/
-|    -  PushCommand.java     // PUSH
-|    -  PopCommand.java      // POP
-|    -  AddCommand.java      // +
-|    -  DefineCommand.java   // DEFINE
-|    -  PrintCommand.java    // PRINT
+   -  PushCommand.java     // PUSH
+   -  PopCommand.java      // POP
+   -  DefineCommand.java   // DEFINE
+   -  PrintCommand.java    // PRINT
+   ...
  -  StackCalculator.java     // Основной класс
  -  commands.properties      // конфигурация фабрики
+
+!!! Если похерю конфиг для рана то вот лока аргумента
+task2/src/main/resources/input.txt
 
 1 ExecutionContext.java (контекст исполнения - было в методических указаниях)
 Хранение данных, необходимых для выполнения команд.
