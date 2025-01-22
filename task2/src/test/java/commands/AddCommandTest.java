@@ -1,9 +1,11 @@
-package task2.commands;
+package commands;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
 import task2.ExecutionContext;
+import task2.commands.AddCommand;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AddCommandTest {
     @Test

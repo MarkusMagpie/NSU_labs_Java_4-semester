@@ -1,5 +1,0 @@
-DEFINE x 4
-PUSH x
-SQRT
-PRINT
-# fsvefvergref

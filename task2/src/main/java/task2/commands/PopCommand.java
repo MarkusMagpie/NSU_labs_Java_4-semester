@@ -2,6 +2,7 @@ package task2.commands;
 
 import task2.Command;
 import task2.ExecutionContext;
+
 import java.util.EmptyStackException;
 
 public class PopCommand extends Command {

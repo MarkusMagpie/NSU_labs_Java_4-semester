@@ -70,7 +70,7 @@ public class WordFrequencyAnalyzer {
             Map<String, Integer> word_frequency = analyzer.analyzeFile(input_file);
 
             // создание выходного CSV файла
-            String output_file = "src\\task1\\output.csv";
+            String output_file = "task1\\src\\main\\java\\task1\\output.csv";
             analyzer.writeToCSV(word_frequency, output_file);
             System.out.println("Создан CSV файл: " + output_file);
         } catch (IOException e) {

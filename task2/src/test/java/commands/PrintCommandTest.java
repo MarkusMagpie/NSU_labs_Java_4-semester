@@ -1,11 +1,14 @@
-package task2.commands;
+package commands;
 
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
-
 import task2.ExecutionContext;
+import task2.commands.PrintCommand;
 
 import java.util.EmptyStackException;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PrintCommandTest {
     @Test
