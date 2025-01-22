@@ -13,7 +13,9 @@ public class PushCommand extends Command {
 
         // значение аргумента кладется на стек
         String arg = args[0];
-        double value = context.GetVariables().getOrDefault(arg, Double.parseDouble(arg));
+//        System.out.println(arg);
+//        System.out.println(context.GetVariables().get(arg));
+        double value = context.GetVariables().get(arg);
         // есть ли значение arg в таблице переменных variables?
         // - да, то берем его
         // - нет, переменная отсутствует, тогда arg пытается интерпретироваться как число.
