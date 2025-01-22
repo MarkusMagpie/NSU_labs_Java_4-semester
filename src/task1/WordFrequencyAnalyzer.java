@@ -4,62 +4,44 @@ import java.io.*;
 import java.util.*;
 
 public class WordFrequencyAnalyzer {
-    private final HashMap<String, Integer> word_frequency;
+    private final HashMap<String, Integer> word_frequency = new HashMap<>();
     private int word_count;
 
-    // конструктор
-    public WordFrequencyAnalyzer() {
-        word_frequency = new HashMap<>();
-        word_count = 0;
-    }
+    // теперь эта функция - анализ частот слов в ОДНОМ файле
+    public Map<String, Integer> analyzeFile(String filename) throws IOException {
+        try (Reader reader = new InputStreamReader(new FileInputStream(filename))) {
+            StringBuilder sb = new StringBuilder(); // для построения слов и записи слов в word_frequency
+            int current_char;
 
-    public void FillWordFrequency(Reader reader, HashMap<String, Integer> word_frequency) throws IOException {
-        StringBuilder sb = new StringBuilder(); // для построения слов и записи слов в word_frequency
-        int current_char;
+            // читаем reader посимвольно
+            while ((current_char = reader.read()) != -1) {
+                char c = (char) current_char;
 
-        // read symbols from input file once at a time
-        while ((current_char = reader.read()) != -1) {
-            char c = (char) current_char;
+                if (Character.isLetterOrDigit(c)) {
+                    sb.append(Character.toLowerCase(c));
+                } else if (!sb.isEmpty()) { // если символ - разделитель, то увеличиваем на 1 частоту этого слова в Map
+                    String word = sb.toString().toLowerCase(); // переводим полученную строку из StringBuilder в нижний регистр
+                    word_frequency.put(word, word_frequency.getOrDefault(word, 0) + 1);
+                    word_count++;
+                    sb.setLength(0); // очищаем StringBuilder
+                }
+            }
 
-            if (Character.isLetterOrDigit(c)) {
-                sb.append(Character.toLowerCase(c));
-            } else if (!sb.isEmpty()) { // если символ - разделитель, то увеличиваем на 1 частоту этого слова в Map
-                String word = sb.toString().toLowerCase(); // переводим полученную строку из StringBuilder в нижний регистр
+            if (!sb.isEmpty()) {
+                String word = sb.toString().toLowerCase();
                 word_frequency.put(word, word_frequency.getOrDefault(word, 0) + 1);
                 word_count++;
-                sb.setLength(0); // очищаем StringBuilder
             }
         }
 
-        if (!sb.isEmpty()) {
-            String word = sb.toString().toLowerCase();
-            word_frequency.put(word, word_frequency.getOrDefault(word, 0) + 1);
-            word_count++;
-        }
+        return new HashMap<>(word_frequency);
     }
 
-    public void Analyze(String[] args) { // static - метод принадлежит не объекту класса, а самому классу!
-        if (args.length != 1) {
-            System.out.println("Ошибка: неверное количество аргументов.");
-            return;
-        }
-
-        String input_file = args[0];
-
-        // открываем входной файл и читаем его
-        try (Reader reader = new InputStreamReader(new FileInputStream(input_file))) {
-            FillWordFrequency(reader, word_frequency);
-        } catch (IOException e) {
-            System.out.println("Ошибка при чтении из файла: " + e.getMessage());
-            return;
-        }
-
+    private void writeToCSV(Map<String, Integer> word_frequency, String output_file) {
         // создаем список из Map.Entry<String, Integer> и сортируем его в порядке убывания
         List<Map.Entry<String, Integer>> sorted_words = new ArrayList<>(word_frequency.entrySet()); // entrySet возвращает Set всех элементов Map (пар)
         sorted_words.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
 
-        // создаем выходной CSV файл
-        String output_file = "src\\task1\\output.csv";
         try (PrintWriter writer = new PrintWriter(new FileOutputStream(output_file))) {
             writer.println("Слово,Частота,Частота (%)");
 
@@ -73,7 +55,26 @@ public class WordFrequencyAnalyzer {
         } catch (IOException e) {
             System.out.println("Ошибка при записи в CSV файл: " + e.getMessage());
         }
+    }
 
-        System.out.println("Создан CSV файл: " + output_file);
+    public static void main(String[] args) {
+        if (args.length != 1) {
+            System.out.println("Ошибка: укажите имя входного файла как единственный аргумент.");
+            return;
+        }
+
+        String input_file = args[0];
+        WordFrequencyAnalyzer analyzer = new WordFrequencyAnalyzer();
+
+        try {
+            Map<String, Integer> word_frequency = analyzer.analyzeFile(input_file);
+
+            // создание выходного CSV файла
+            String output_file = "src\\task1\\output.csv";
+            analyzer.writeToCSV(word_frequency, output_file);
+            System.out.println("Создан CSV файл: " + output_file);
+        } catch (IOException e) {
+            System.out.println("Ошибка при обработке файла " + input_file + ": " + e.getMessage());
+        }
     }
 }
