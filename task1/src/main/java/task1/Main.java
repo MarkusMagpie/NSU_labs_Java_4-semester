@@ -2,7 +2,7 @@ package task1;
 
 public class Main {
     public static void main(String[] args) {
-        // передаём имя файла в качестве аргумента
+        // pass the name of the input file as an argument
         String file = "task1\\src\\main\\java\\task1\\input.txt";
 
 //        WordFrequencyAnalyzer analyzer = new WordFrequencyAnalyzer();

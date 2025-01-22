@@ -53,13 +53,13 @@ public class WordFrequencyAnalyzer {
                 writer.println(word + "," + frequency + "," + String.format("%.0f", percentage) + "%");
             }
         } catch (IOException e) {
-            System.out.println("Ошибка при записи в CSV файл: " + e.getMessage());
+            System.out.println("Error while writing to CSV file: " + e.getMessage());
         }
     }
 
     public static void main(String[] args) {
         if (args.length != 1) {
-            System.out.println("Ошибка: укажите имя входного файла как единственный аргумент.");
+            System.out.println("Error: please specify input file name as a single argument.");
             return;
         }
 
@@ -72,9 +72,9 @@ public class WordFrequencyAnalyzer {
             // создание выходного CSV файла
             String output_file = "task1\\src\\main\\java\\task1\\output.csv";
             analyzer.writeToCSV(word_frequency, output_file);
-            System.out.println("Создан CSV файл: " + output_file);
+            System.out.println("Created CSV file: " + output_file);
         } catch (IOException e) {
-            System.out.println("Ошибка при обработке файла " + input_file + ": " + e.getMessage());
+            System.out.println("Error while reading file: " + input_file + ": " + e.getMessage());
         }
     }
 }
