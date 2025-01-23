@@ -3,7 +3,12 @@ package task1;
 import java.io.*;
 import java.util.*;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 public class WordFrequencyAnalyzer {
+    private static final Logger logger = LogManager.getLogger(Main.class);
+
     private final HashMap<String, Integer> word_frequency = new HashMap<>();
     private int word_count;
 
@@ -24,6 +29,8 @@ public class WordFrequencyAnalyzer {
                     word_frequency.put(word, word_frequency.getOrDefault(word, 0) + 1);
                     word_count++;
                     sb.setLength(0); // очищаем StringBuilder
+
+                    logger.info("Слово: " + word + ", частота: " + word_frequency.get(word));
                 }
             }
 
@@ -31,10 +38,13 @@ public class WordFrequencyAnalyzer {
                 String word = sb.toString().toLowerCase();
                 word_frequency.put(word, word_frequency.getOrDefault(word, 0) + 1);
                 word_count++;
+
+                logger.info("Слово: " + word + ", частота: " + word_frequency.get(word));
             }
         }
 
-        return new HashMap<>(word_frequency);
+        logger.info("Всего слов: " + word_count);
+        return word_frequency;
     }
 
     private void writeToCSV(Map<String, Integer> word_frequency, String output_file) {
@@ -54,12 +64,14 @@ public class WordFrequencyAnalyzer {
             }
         } catch (IOException e) {
             System.out.println("Error while writing to CSV file: " + e.getMessage());
+            logger.error("Ошибка при записи в CSV-файл: " + e.getMessage());
         }
     }
 
     public static void main(String[] args) {
         if (args.length != 1) {
             System.out.println("Error: please specify input file name as a single argument.");
+            logger.error("Неверное количество аргументов: " + args.length);
             return;
         }
 
@@ -70,9 +82,11 @@ public class WordFrequencyAnalyzer {
             Map<String, Integer> word_frequency = analyzer.analyzeFile(input_file);
 
             // создание выходного CSV файла
-            String output_file = "task1\\src\\main\\java\\task1\\output.csv";
+            String output_file = "task1/src/main/resources/output.csv";
             analyzer.writeToCSV(word_frequency, output_file);
-            System.out.println("Created CSV file: " + output_file);
+
+//            System.out.println("Created CSV file: " + output_file);
+            logger.info("CSV-файл создан: " + output_file);
         } catch (IOException e) {
             System.out.println("Error while reading file: " + input_file + ": " + e.getMessage());
         }
