@@ -1,0 +1,6 @@
+markus,100,40
+mathew_Z,100,26
+zzzz,0,11
+Базис,300,54
+nanai,100,14
+Matvey,100,9
