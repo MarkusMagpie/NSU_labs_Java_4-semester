@@ -26,17 +26,17 @@ public class Main {
                 String command_name = parts[0].toUpperCase(); // первый элемент строки - всегда команда
                 String[] command_args = Arrays.copyOfRange(parts, 1, parts.length); // остальные - аргументы команды
 
-                logger.log(Level.INFO, "Команда получена: " + command_name + " " + Arrays.toString(command_args));
+                logger.log(Level.INFO, "Command received: " + command_name + " " + Arrays.toString(command_args));
                 try {
                     Command command = CommandFactory.CreateCommand(command_name);
                     command.Execute(context, command_args);
-                    logger.log(Level.INFO, "Команда выполнена: " + command_name + " " + Arrays.toString(command_args));
+                    logger.log(Level.INFO, "Command executed: " + command_name + " " + Arrays.toString(command_args));
                 } catch (Exception e) {
-                    logger.log(Level.SEVERE, "Ошибка при выполнении команды: " + command_name, e);
+                    logger.log(Level.SEVERE, "Error while executing command: " + command_name, e);
                 }
             }
         } catch (IOException e) {
-            logger.log(Level.SEVERE, "Ошибка при чтении входного файла", e);
+            logger.log(Level.SEVERE, "Error while reading input file", e);
         }
     }
 }

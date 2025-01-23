@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PopCommandTest {
     @Test
-    void testPopValue() {
+    void testPop() {
         ExecutionContext context = new ExecutionContext();
         PopCommand popCommand = new PopCommand();
 

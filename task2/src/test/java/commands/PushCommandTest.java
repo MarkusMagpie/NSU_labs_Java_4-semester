@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PushCommandTest {
     @Test
-    void testPushVariable() {
+    void testPush() {
         ExecutionContext context = new ExecutionContext();
         PushCommand pushCommand = new PushCommand();
 
@@ -23,7 +23,7 @@ public class PushCommandTest {
     }
 
     @Test
-    void testPushInvalidArgs() {
+    void testPushThrows() {
         ExecutionContext context = new ExecutionContext();
         PushCommand pushCommand = new PushCommand();
 

@@ -24,7 +24,7 @@ public class AddCommandTest {
     }
 
     @Test
-    void testAddInsufficientOperands() {
+    void testAddThrows() {
         ExecutionContext context = new ExecutionContext();
         AddCommand add_command = new AddCommand();
 

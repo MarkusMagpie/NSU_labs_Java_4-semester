@@ -24,7 +24,7 @@ public class MulCommandTest {
     }
 
     @Test
-    void testMulInsufficientOperands() {
+    void testMulThrows() {
         ExecutionContext context = new ExecutionContext();
         MulCommand mulCommand = new MulCommand();
 

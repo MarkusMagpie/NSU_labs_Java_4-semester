@@ -14,7 +14,6 @@ class CommandFactory {
     static {
         // загрузка соответствий команд и классов из файла конфигурации
         try (InputStream input = CommandFactory.class.getResourceAsStream("/commands.properties")) {
-
             Properties properties = new Properties();
             properties.load(input);
             for (String name : properties.stringPropertyNames()) {

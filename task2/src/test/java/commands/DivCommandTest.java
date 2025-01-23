@@ -24,7 +24,7 @@ public class DivCommandTest {
     }
 
     @Test
-    void testDivideByZero() {
+    void testDivByZero() {
         ExecutionContext context = new ExecutionContext();
         DivCommand div_command = new DivCommand();
 
@@ -35,7 +35,7 @@ public class DivCommandTest {
     }
 
     @Test
-    void testDivInsufficientOperands() {
+    void testDivThrows() {
         ExecutionContext context = new ExecutionContext();
         DivCommand div_command = new DivCommand();
 
