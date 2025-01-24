@@ -63,31 +63,6 @@ public class HighScores {
         JOptionPane.showMessageDialog(null, sb.toString());
     }
 
-    // 3 getter methods
-    public List<Integer> GetScores() {
-        List<Integer> scores = new ArrayList<>();
-        for (ScoreEntry entry : this.scores) {
-            scores.add(entry.GetScore());
-        }
-        return scores;
-    }
-
-    public List<String> GetNames() {
-        List<String> names = new ArrayList<>();
-        for (ScoreEntry entry : this.scores) {
-            names.add(entry.GetName());
-        }
-        return names;
-    }
-
-    public List<Integer> GetTimes() {
-        List<Integer> times = new ArrayList<>();
-        for (ScoreEntry entry : this.scores) {
-            times.add(entry.GetTime());
-        }
-        return times;
-    }
-
     private class ScoreEntry {
         private String name;
         private int score;

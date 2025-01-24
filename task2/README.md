@@ -1,7 +1,7 @@
 # Отчет по 2 заданию "Стековый калькулятор"
 
 ## 1.1 ExecutionContest.java
-```angular2html
+```java
 public class ExecutionContext {
     private final Stack<Double> stack = new Stack<>();
     private final Map<String, Double> variables = new HashMap<>();
@@ -27,7 +27,7 @@ public class ExecutionContext {
 Значения из массива будут перемещаться в стек.
 
 ## 1.2 Command.java
-```angular2html
+```java
 public abstract class Command {
     public abstract void Execute(ExecutionContext context, String[] args) throws Exception;
 }
@@ -45,7 +45,7 @@ public abstract class Command {
 принимает текущий контекст исполнения и аргументы для комманды (1 или 2).
   
 ## 1.3 CommandFactory.java
-```angular2html
+```java
 class CommandFactory {
     private static final Map<String, String> command_map = new HashMap<>();
 
@@ -75,7 +75,7 @@ class CommandFactory {
 предварительно загружая файл конфигурации `command.properties`
   
 ### Рассмотрим сначала статический блок вне методов:  
-1.```angular2html InputStream input = CommandFactory.class.getResourceAsStream("/commands.properties")```  
+1.```InputStream input = CommandFactory.class.getResourceAsStream("/commands.properties")```  
 
 `CommandFactory.class` возвращает объект `Class`, представляющий класс `CommandFactory`. 
 Далее с помощью [getResourceAsStream](https://docs.oracle.com/javase/8/docs/api/java/lang/ClassLoader.html#getResourceAsStream-java.lang.String-) 
@@ -86,7 +86,7 @@ class CommandFactory {
 > [!NOTE]  
 > Путь, начинающийся с /, указывает, что файл ищется от корня
 2. Загрузка пар в объект типа Properties:
-```angular2html
+```java
 Properties properties = new Properties();
 properties.load(input);
 ``` 
@@ -95,7 +95,7 @@ properties.load(input);
 [load](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.InputStream-).
 
 3. Запонение `command_map` парами
-```angular2html
+```java
 for (String name : properties.stringPropertyNames()) {
     command_map.put(name, properties.getProperty(name));
 }
@@ -104,7 +104,7 @@ for (String name : properties.stringPropertyNames()) {
 а метод `properties.getProperty(name)` возвращает значение, связанное с переданным ключом `name`.
   
 ### Теперь вкратце рассмотрим метод `CreateCommand`
-```angular2html
+```java
 public static Command CreateCommand(String name) throws Exception {
         String class_name = command_map.get(name);
         if (class_name == null) {
@@ -118,7 +118,7 @@ public static Command CreateCommand(String name) throws Exception {
 Мы берем имя класса команды (например: `name = "PUSH", class_name = "task2.commands.PushCommand"`).
   
 И теперь самая сложная для понимания строка:
-```angular2html
+```java
 return (Command) Class.forName(class_name).getDeclaredConstructor().newInstance();
 ```
 Здесь метод [forName(class_name)](https://www.geeksforgeeks.org/class-forname-method-in-java-with-examples/)
@@ -128,7 +128,7 @@ return (Command) Class.forName(class_name).getDeclaredConstructor().newInstance(
 
 ## 1.4 Дочерние команды класса `Command`
 Данные классы однотипные и я рассмотрю только один пример: класс `DefineCommand`:
-```angular2html
+```java
 public class DefineCommand extends Command {
     @Override
     public void Execute(ExecutionContext context, String[] args) {
@@ -152,7 +152,7 @@ public class DefineCommand extends Command {
 с помощью метода [put(variable, value)](https://www.geeksforgeeks.org/hashmap-put-method-in-java/).
 
 ## 1.5 Main.java
-```angular2html
+```java
 public class Main {
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
@@ -198,7 +198,7 @@ public class Main {
 Мы создаем логгер с именем класса `Main` (`Main.class.getName()`) с 
 помощью метода [getLogger(String name)](https://docs.oracle.com/javase/8/docs/api/java/util/logging/Logger.html#getLogger-java.lang.String-).  
 Логгирование информации происходи с помощью метода [public void log(Level level, String msg)](https://docs.oracle.com/javase/8/docs/api/java/util/logging/Logger.html#log-java.util.logging.Level-java.lang.String-):
-```angular2html
+```java
 logger.log(Level.INFO, "Команда получена: " + command_name + " " + Arrays.toString(command_args));
 ```
 
@@ -209,7 +209,7 @@ logger.log(Level.INFO, "Команда получена: " + command_name + " " 
 Туториал по тестам, который я смотрел [здесь](https://junit.org/junit5/docs/current/user-guide/#writing-tests)  
 
 Ниже пример моего теста по туториалу:
-```angular2html
+```java
 import org.junit.jupiter.api.Test;
 
 import task2.ExecutionContext;

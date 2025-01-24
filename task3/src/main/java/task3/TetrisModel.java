@@ -16,7 +16,7 @@ public class TetrisModel {
     private boolean paused;
 
     public TetrisModel(int width, int height) {
-        board = new boolean[width][height];;
+        board = new boolean[width][height];
         this.width = width;
         this.height = height;
         SpawnPiece();

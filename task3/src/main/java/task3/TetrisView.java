@@ -50,10 +50,12 @@ public class TetrisView extends JPanel {
             g.fillRect(p.x * cell_size, p.y * cell_size, cell_size, cell_size);
             g.setColor(Color.BLACK);
             g.drawRect(p.x * cell_size, p.y * cell_size, cell_size, cell_size);
+            // если надо чтобы вся фигура а не одна клетка была одного цвета, то раскоментируй что ниже
+//            g.setColor(piece.getColor());
+//            g.fillRect(p.x * cell_size, p.y * cell_size, cell_size, cell_size);
         }
     }
 
-    // getter for proper grid creation
     public int GetCellSize() {
         return cell_size;
     }

@@ -11,8 +11,8 @@ import java.awt.*;
 // rotate - function that rotates the figure
 
 public class TetroMino {
-    private Point[] coordinates;
-    private Color color;
+    private final Point[] coordinates;
+    private final Color color;
 
     // constructor
     public TetroMino(Point[] coordinates, Color color) {
@@ -20,29 +20,20 @@ public class TetroMino {
         this.color = color;
     }
 
-    // getter functions
-    public Point[] getCoordinates() {
-        return coordinates;
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
     public void rotate() {
         Point center = coordinates[1];
-        for (int i = 0; i < coordinates.length; ++i) {
-            // 2d matrix 90 degree counter-clockwise rotation matrix
+        for (Point coordinate : coordinates) {
+            // 2d matrix 90 degree clockwise rotation matrix
             // | 0 -1| => x = -y
             // | 1  0| => y = x
-            int x = coordinates[i].x - center.x; // offset from center
-            int y = coordinates[i].y - center.y;
-            coordinates[i].x =center.x - y;
-            coordinates[i].y = center.y + x;
+            int x = coordinate.x - center.x; // offset from center
+            int y = coordinate.y - center.y;
+            coordinate.x = center.x - y;
+            coordinate.y = center.y + x;
         }
     }
 
-    // factory methods to create all kinds of tetrominos (7)
+    // methods to create all kinds of tetrominos (7)
     public static TetroMino createI() {
         return new TetroMino(new Point[]{
                 new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(3, 1)
@@ -83,5 +74,13 @@ public class TetroMino {
         return new TetroMino(new Point[]{
                 new Point(2, 0), new Point(0, 1), new Point(1, 1), new Point(2, 1)
         }, Color.ORANGE);
+    }
+
+    public Point[] getCoordinates() {
+        return coordinates;
+    }
+
+    public Color getColor() {
+        return color;
     }
 }
