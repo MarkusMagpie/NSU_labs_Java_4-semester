@@ -125,13 +125,15 @@ public class TetrisController implements KeyListener {
     public void ShowHighScores() {
         PauseGame();
         hs.ShowHighScores();
+        System.out.println("Showed high scores");
         ResumeGame();
     }
 
     public void ShowAbout() {
         PauseGame();
-        String about = "NSU 4th semester\nTetris by Matvey Sorokin";
+        String about = "NSU 4th semester\nTetris\nMathew Sorokin";
         JOptionPane.showMessageDialog(null, about, "About", JOptionPane.INFORMATION_MESSAGE);
+        System.out.println("Showed information about game");
         ResumeGame();
     }
 
@@ -140,7 +142,8 @@ public class TetrisController implements KeyListener {
         int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to exit?", "Exit Confirmation", JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION) {
             hs.AddScore(player_name, model.GetScore(), timer_panel.GetElapsedTime());
-            System.out.println("Game exited");
+            System.out.println("Added new score: " + player_name + " - " + model.GetScore() + " - " + timer_panel.GetElapsedTime() + "s");
+            System.out.println("Вы вышли из игры");
             System.exit(0);
         }
         ResumeGame();

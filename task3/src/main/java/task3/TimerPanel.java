@@ -8,7 +8,7 @@ import java.awt.event.ActionListener;
 public class TimerPanel extends JPanel {
     private JLabel timer_label;
     private Timer timer;
-    private int elapsedTime; // in-game time in secs
+    private int elapsed_time; // in-game time in secs
 
     public TimerPanel() {
         timer_label = new JLabel("Time: 0");
@@ -16,15 +16,15 @@ public class TimerPanel extends JPanel {
 
         add(timer_label, BorderLayout.CENTER);
 
-        elapsedTime = 0;
+        elapsed_time = 0;
 
         // start timer when panel is created
         // when any action is performed in game, the timer is updated
         timer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                elapsedTime++;
-                timer_label.setText("Time: " + elapsedTime);
+                elapsed_time++;
+                timer_label.setText("Time: " + elapsed_time);
             }
         });
     }
@@ -38,11 +38,11 @@ public class TimerPanel extends JPanel {
     }
 
     public void ResetTimer() {
-        elapsedTime = 0;
+        elapsed_time = 0;
         timer_label.setText("Time: 0");
     }
 
     public int GetElapsedTime() {
-        return elapsedTime;
+        return elapsed_time;
     }
 }

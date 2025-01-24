@@ -892,7 +892,7 @@ private void DrawCurrentPiece(Graphics g, TetroMino piece) {
 public class TimerPanel extends JPanel {
     private JLabel timer_label;
     private Timer timer;
-    private int elapsedTime; // in-game time in secs
+    private int elapsed_time; 
 
     public TimerPanel() {
         timer_label = new JLabel("Time: 0");
@@ -900,13 +900,13 @@ public class TimerPanel extends JPanel {
 
         add(timer_label, BorderLayout.CENTER);
 
-        elapsedTime = 0;
-
+        elapsed_time = 0;
+        
         timer = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                elapsedTime++;
-                timer_label.setText("Time: " + elapsedTime);
+                elapsed_time++;
+                timer_label.setText("Time: " + elapsed_time);
             }
         });
     }
@@ -920,12 +920,232 @@ public class TimerPanel extends JPanel {
     }
 
     public void ResetTimer() {
-        elapsedTime = 0;
+        elapsed_time = 0;
         timer_label.setText("Time: 0");
     }
 
     public int GetElapsedTime() {
-        return elapsedTime;
+        return elapsed_time;
+    }
+}
+```
+### 5.1 Конструктор `TimerPanel()`
+```java
+public TimerPanel() {
+    timer_label = new JLabel("Time: 0");
+    setLayout(new BorderLayout());
+
+    add(timer_label, BorderLayout.CENTER);
+
+    elapsed_time = 0;
+    
+    timer = new Timer(1000, new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            elapsed_time++;
+            timer_label.setText("Time: " + elapsed_time);
+        }
+    });
+}
+```
+В конструкторе создаем метку для отображения времени JLabel(), 
+используем `BorderLayout()` для расположения метки по центру.  
+> [!NOTE]
+> [How To Use BorderLayout](https://docs.oracle.com/javase/tutorial/uiswing/layout/border.html) 
+> здесь можно прочесть о добавлении элементов в конкретное место JFrame.
+
+Далее создаем переменную следящую за временем игры `elapsed_time`.  
+Теперь самое сложное: создание таймера:
+```java
+timer = new Timer(1000, new ActionListener() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        elapsed_time++;
+        timer_label.setText("Time: " + elapsed_time);
+    }
+});
+```
+ - таймер срабатывает каждый 1000 мс - 1 сек.
+ - при каждом срабатывании таймера срабатывает метод `actionEvent`:
+> `ActionListener` — это интерфейс, предоставляемый библиотекой `Swing`. 
+> Он используется для обработки событий - в нашем случае - срабатывания 
+> таймера `Timer`, что происходит раз в секунду.  
+> 
+> Метод `actionPerformed` вызывается каждый раз когда возникает событие,
+> связанное с таймером.
+
+Все остальные методы класса мелочные и однострочные, нет смысла разбирать.
+
+## 6 `ScorePanel.java`
+```java
+public class ScorePanel extends JPanel {
+    private JLabel score_label;
+    private TetrisModel model;
+
+    public ScorePanel(TetrisModel model) {
+        this.model = model;
+        score_label = new JLabel("Score: 0");
+        setLayout(new BorderLayout());
+        add(score_label, BorderLayout.CENTER);
+    }
+
+    public void UpdateScore() {
+        score_label.setText("Score: " + model.GetScore());
+    }
+}
+```
+`ScorePanel` это панель для отображения текущего счёта игрока.
+Поля класса:
+1. `private JLabel score_label` - метка для отображения текста.
+2. `private TetrisModel model` - модель игры, откуда мы берем 
+текущее значение очков для обновления в методе `UpdateScore()`.
+  
+### 6.1 Конструктор `ScorePanel`
+Инициаизируем метку `score_label` с нулевым счетом и помещаем ее в центр 
+панели.
+
+### 6.2 Метод `UpdateScore()`
+Тупо меняем текст `score_label` на текущее значение очков игрока с помощью
+`model.GetScore()`.
+
+## 7 `TetrisController.java`
+```java
+public class TetrisController implements KeyListener {
+    private TetrisModel model;
+    private TetrisView view;
+    private HighScores hs;
+
+    private TimerPanel timer_panel;
+    private Timer game_timer;
+
+    private String player_name;
+
+    public TetrisController(TetrisModel model, TetrisView view, HighScores hs, TimerPanel timer_panel) {
+        this.model = model;
+        this.view = view;
+        this.hs = new HighScores();
+        this.timer_panel = timer_panel;
+        timer_panel.StartTimer();
+
+        player_name = JOptionPane.showInputDialog(null, "Enter your username: ", "New Game", JOptionPane.QUESTION_MESSAGE);
+        
+        game_timer = new Timer(1000, e -> {
+            if (!model.GetPause()) {
+                model.MovePieceDown();
+                view.repaint();
+            }
+        });
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            if (model.GetPause()) {
+                ResumeGame();
+            } else {
+                PauseGame();
+            }
+        }
+
+        if (model.GetPause()) return;
+
+        switch (e.getKeyCode()) {
+            case KeyEvent.VK_LEFT:
+                model.MovePieceLeft();
+                break;
+            case KeyEvent.VK_A:
+                model.MovePieceLeft();
+                break;
+
+            case KeyEvent.VK_RIGHT:
+                model.MovePieceRight();
+                break;
+            case KeyEvent.VK_D:
+                model.MovePieceRight();
+                break;
+
+            case KeyEvent.VK_DOWN:
+                model.MovePieceDown();
+                break;
+            case KeyEvent.VK_S:
+                model.MovePieceDown();
+                break;
+
+            case KeyEvent.VK_UP:
+                model.RotatePiece();
+                break;
+            case KeyEvent.VK_W:
+                model.RotatePiece();
+                break;
+
+            case KeyEvent.VK_Q:
+                ExitVerification();
+                break;
+        }
+        view.repaint();
+    }
+    
+    @Override
+    public void keyReleased(KeyEvent e) {}
+
+    @Override
+    public void keyTyped(KeyEvent e) {}
+
+    public void PauseGame() {
+        model.SetPause(true);
+        timer_panel.StopTimer();
+    }
+
+    public void ResumeGame() {
+        model.SetPause(false);
+        timer_panel.StartTimer();
+    }
+
+    public void StartNewGame() {
+        PauseGame();
+        int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to start new game?", "New Game Confirmation", JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+            System.out.println("New game started");
+
+            if (player_name != null) {
+                hs.AddScore(player_name, model.GetScore(), timer_panel.GetElapsedTime());
+            }
+            player_name = JOptionPane.showInputDialog(null, "Enter your username: ", "New Game", JOptionPane.QUESTION_MESSAGE);
+
+            model.Reset();
+            view.repaint();
+            timer_panel.ResetTimer();
+            timer_panel.StartTimer();
+        } else {
+            ResumeGame();
+        }
+    }
+
+    public void ShowHighScores() {
+        PauseGame();
+        hs.ShowHighScores();
+        System.out.println("Showed high scores");
+        ResumeGame();
+    }
+
+    public void ShowAbout() {
+        PauseGame();
+        String about = "NSU 4th semester\nTetris\nMathew Sorokin";
+        JOptionPane.showMessageDialog(null, about, "About", JOptionPane.INFORMATION_MESSAGE);
+        System.out.println("Showed information about game");
+        ResumeGame();
+    }
+
+    public void ExitVerification() {
+        PauseGame();
+        int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to exit?", "Exit Confirmation", JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+            hs.AddScore(player_name, model.GetScore(), timer_panel.GetElapsedTime());
+            System.out.println("Added new score: " + player_name + " - " + model.GetScore() + " - " + timer_panel.GetElapsedTime() + "s");
+            System.out.println("Вы вышли из игры");
+            System.exit(0);
+        }
+        ResumeGame();
     }
 }
 ```

@@ -12,13 +12,15 @@ public class Main {
         TetrisView view = new TetrisView(model); // View
         HighScores hs = new HighScores();
         TimerPanel timer_panel = new TimerPanel();
-        TetrisController controller = new TetrisController(model, view, hs, timer_panel); // Controller
         ScorePanel score_panel = new ScorePanel(model);
+        TetrisController controller = new TetrisController(model, view, hs, timer_panel); // Controller
 
-        JFrame frame = new JFrame("Тетрис");
+        JFrame frame = new JFrame("Tetris");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        frame.setSize(new Dimension(view.GetCellSize() * model.GetWidth() + 130, view.GetCellSize() * model.GetHeight() + 90));
+        frame.setSize(new Dimension(view.GetCellSize() * model.GetWidth() + 12, view.GetCellSize() * model.GetHeight() + 90));
+        frame.setResizable(false);
+
         frame.setLayout(new BorderLayout());
         frame.add(view, BorderLayout.CENTER);
         frame.add(score_panel, BorderLayout.SOUTH);
@@ -40,6 +42,6 @@ public class Main {
                 e.printStackTrace();
             }
         }
-        System.out.println("ИГРА ОКОНЧЕНА!");
+        System.out.println("GAME OVER!");
     }
 }
