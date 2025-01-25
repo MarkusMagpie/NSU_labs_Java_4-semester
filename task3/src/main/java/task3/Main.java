@@ -18,7 +18,7 @@ public class Main {
         JFrame frame = new JFrame("Tetris");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        frame.setSize(new Dimension(view.GetCellSize() * model.GetWidth() + 12, view.GetCellSize() * model.GetHeight() + 90));
+        frame.setSize(view.GetCellSize() * model.GetWidth() + 12, view.GetCellSize() * model.GetHeight() + 90);
         frame.setResizable(false);
 
         frame.setLayout(new BorderLayout());
@@ -27,8 +27,8 @@ public class Main {
         frame.add(timer_panel, BorderLayout.NORTH);
         frame.addKeyListener(controller);
 
-        TetrisMenuBar menuBar = new TetrisMenuBar(controller);
-        frame.setJMenuBar(menuBar);
+        TetrisMenuBar menu_bar = new TetrisMenuBar(controller);
+        frame.setJMenuBar(menu_bar);
 
         frame.setVisible(true);
 

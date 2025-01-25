@@ -24,6 +24,7 @@ public class TetrisView extends JPanel {
         super.paintComponent(g);
         DrawBoard(g, model.GetBoard());
         DrawCurrentPiece(g, model.GetCurrentPiece());
+//        System.out.println("ReDrawn");
     }
 
     // draw board from TetrisModel class

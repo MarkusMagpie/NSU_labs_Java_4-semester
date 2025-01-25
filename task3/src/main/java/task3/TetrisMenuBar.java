@@ -12,12 +12,14 @@ public class TetrisMenuBar extends JMenuBar {
         JMenuItem high_scores_item = new JMenuItem("High Scores");
         JMenuItem about = new JMenuItem("About");
 
-        new_game_item.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                controller.StartNewGame();
-            }
-        });
+//        new_game_item.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                controller.StartNewGame();
+//            }
+//        });
+
+        new_game_item.addActionListener(e -> controller.StartNewGame()); // 2 вариант записи лямбда-выражением
 
         high_scores_item.addActionListener(new ActionListener() {
             @Override

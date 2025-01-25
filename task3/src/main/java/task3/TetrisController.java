@@ -47,39 +47,28 @@ public class TetrisController implements KeyListener {
             }
         }
 
+        if (e.getKeyCode() == KeyEvent.VK_Q) {
+            ExitVerification();
+        }
+
+        // обязательно проверка здесь, НЕ ВЫШЕ ибо тогда игнорит вообще все кнопки и нельзя снять паузу!!!
         if (model.GetPause()) return;
 
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_LEFT:
-                model.MovePieceLeft();
-                break;
-            case KeyEvent.VK_A:
+            case KeyEvent.VK_LEFT, KeyEvent.VK_A:
                 model.MovePieceLeft();
                 break;
 
-            case KeyEvent.VK_RIGHT:
-                model.MovePieceRight();
-                break;
-            case KeyEvent.VK_D:
+            case KeyEvent.VK_RIGHT, KeyEvent.VK_D:
                 model.MovePieceRight();
                 break;
 
-            case KeyEvent.VK_DOWN:
-                model.MovePieceDown();
-                break;
-            case KeyEvent.VK_S:
+            case KeyEvent.VK_DOWN, KeyEvent.VK_S:
                 model.MovePieceDown();
                 break;
 
-            case KeyEvent.VK_UP:
-                model.RotatePiece(); // !!!
-                break;
-            case KeyEvent.VK_W:
+            case KeyEvent.VK_UP, KeyEvent.VK_W:
                 model.RotatePiece();
-                break;
-
-            case KeyEvent.VK_Q:
-                ExitVerification();
                 break;
         }
         view.repaint();
@@ -93,11 +82,13 @@ public class TetrisController implements KeyListener {
     public void keyTyped(KeyEvent e) {}
 
     public void PauseGame() {
+        System.out.println("Game paused");
         model.SetPause(true);
         timer_panel.StopTimer();
     }
 
     public void ResumeGame() {
+        System.out.println("Game resumed");
         model.SetPause(false);
         timer_panel.StartTimer();
     }
@@ -124,16 +115,16 @@ public class TetrisController implements KeyListener {
 
     public void ShowHighScores() {
         PauseGame();
-        hs.ShowHighScores();
         System.out.println("Showed high scores");
+        hs.ShowHighScores();
         ResumeGame();
     }
 
     public void ShowAbout() {
         PauseGame();
         String about = "NSU 4th semester\nTetris\nMathew Sorokin";
-        JOptionPane.showMessageDialog(null, about, "About", JOptionPane.INFORMATION_MESSAGE);
         System.out.println("Showed information about game");
+        JOptionPane.showMessageDialog(null, about, "About", JOptionPane.INFORMATION_MESSAGE);
         ResumeGame();
     }
 
@@ -143,7 +134,7 @@ public class TetrisController implements KeyListener {
         if (result == JOptionPane.YES_OPTION) {
             hs.AddScore(player_name, model.GetScore(), timer_panel.GetElapsedTime());
             System.out.println("Added new score: " + player_name + " - " + model.GetScore() + " - " + timer_panel.GetElapsedTime() + "s");
-            System.out.println("Вы вышли из игры");
+            System.out.println("You have exited the game");
             System.exit(0);
         }
         ResumeGame();

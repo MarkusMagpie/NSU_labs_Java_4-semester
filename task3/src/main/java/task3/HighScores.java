@@ -50,7 +50,8 @@ public class HighScores {
         scores.add(new ScoreEntry(name, score, time));
 //        Collections.sort(scores); // ascending by default !!! not working atm
         if (scores.size() > 10) {
-            scores.remove(scores.size() - 1); // remove last if > 10 on display
+//            scores.remove(scores.size() - 1); // remove last if > 10 on display
+            scores.removeLast(); // закоменченная строка работает 1в1
         }
         SaveScores();
     }

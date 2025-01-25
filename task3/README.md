@@ -994,7 +994,9 @@ public class ScorePanel extends JPanel {
     }
 }
 ```
-`ScorePanel` это панель для отображения текущего счёта игрока.
+`ScorePanel` это панель для отображения текущего счёта игрока. 
+Замечу что сам класс расщиряет класс `JPanel`, поэтому когда мы
+используем метод `add` мы будем **добавлять метку на панель**.  
 Поля класса:
 1. `private JLabel score_label` - метка для отображения текста.
 2. `private TetrisModel model` - модель игры, откуда мы берем 
@@ -1039,6 +1041,8 @@ public class TetrisController implements KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        if (model.GetPause()) return;
+     
         if (e.getKeyCode() == KeyEvent.VK_SPACE) {
             if (model.GetPause()) {
                 ResumeGame();
@@ -1047,37 +1051,23 @@ public class TetrisController implements KeyListener {
             }
         }
 
-        if (model.GetPause()) return;
-
         switch (e.getKeyCode()) {
-            case KeyEvent.VK_LEFT:
+            case KeyEvent.VK_LEFT, KeyEvent.VK_A:
                 model.MovePieceLeft();
                 break;
-            case KeyEvent.VK_A:
-                model.MovePieceLeft();
-                break;
-
-            case KeyEvent.VK_RIGHT:
+      
+            case KeyEvent.VK_RIGHT, KeyEvent.VK_D:
                 model.MovePieceRight();
                 break;
-            case KeyEvent.VK_D:
-                model.MovePieceRight();
-                break;
-
-            case KeyEvent.VK_DOWN:
+      
+            case KeyEvent.VK_DOWN, KeyEvent.VK_S:
                 model.MovePieceDown();
                 break;
-            case KeyEvent.VK_S:
-                model.MovePieceDown();
-                break;
-
-            case KeyEvent.VK_UP:
+      
+            case KeyEvent.VK_UP, KeyEvent.VK_W:
                 model.RotatePiece();
                 break;
-            case KeyEvent.VK_W:
-                model.RotatePiece();
-                break;
-
+      
             case KeyEvent.VK_Q:
                 ExitVerification();
                 break;
@@ -1146,6 +1136,267 @@ public class TetrisController implements KeyListener {
             System.exit(0);
         }
         ResumeGame();
+    }
+}
+```
+Обращаю внимание что класс имплементирует интерфейс `KeyListener`, а
+значит может использовать все его методы, нас интересует `keyPressed()`. 
+Примеры [здесь](https://docs.oracle.com/javase/8/docs/api/java/awt/event/KeyListener.html#keyPressed-java.awt.event.KeyEvent-).  
+
+Класс `TetrisController` связывает пользовательский ввод 
+с соответствующими действиями в модели `TetrisModel` и 
+обновлением представления `TetrisView`. 
+
+Он также управляет таймером игры, обработкой паузы, 
+запуском новой игры, отображением информации и выходом из игры - это 
+команды которые доступны игроку во время игры.
+
+### 7.1 Конструктор `TetrisController(...)`
+```java
+public TetrisController(TetrisModel model, TetrisView view, HighScores hs, TimerPanel timer_panel) {
+    this.model = model;
+    this.view = view;
+    this.hs = new HighScores();
+    this.timer_panel = timer_panel;
+    timer_panel.StartTimer();
+
+    player_name = JOptionPane.showInputDialog(null, "Enter your username: ", "New Game", JOptionPane.QUESTION_MESSAGE);
+    
+    game_timer = new Timer(1000, e -> {
+        if (!model.GetPause()) {
+            model.MovePieceDown();
+            view.repaint();
+        }
+    });
+}
+```
+Получает ссылки на модель, представление, панель таймера и таблицу рекордов.  
+С помощью метода [JOptionPane.showInputDialog()](https://docs.oracle.com/javase/8/docs/api/javax/swing/JOptionPane.html#showInputDialog-java.awt.Component-java.lang.Object-java.lang.String-int-) показывает 
+диалоговое окно для ввода имени игрока при старте игры.
+
+Настройка `game_timer`:  
+Каждую секунду если игра не на паузе, 
+то вызываем `MovePieceDown()` и обновляем представление методом `repaint()`.
+> Пример использования `repaint()` смотри [здесь](https://www.javatpoint.com/repaint-method-in-java)
+  
+### 7.2 Перегрузка метода `keyPressed(KeyEvent e)`
+```java
+@Override
+public void keyPressed(KeyEvent e) {
+    if (model.GetPause()) return;
+ 
+    if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+        if (model.GetPause()) {
+            ResumeGame();
+        } else {
+            PauseGame();
+        }
+    }
+
+    switch (e.getKeyCode()) {
+        case KeyEvent.VK_LEFT, KeyEvent.VK_A:
+            model.MovePieceLeft();
+            break;
+  
+        case KeyEvent.VK_RIGHT, KeyEvent.VK_D:
+            model.MovePieceRight();
+            break;
+  
+        case KeyEvent.VK_DOWN, KeyEvent.VK_S:
+            model.MovePieceDown();
+            break;
+  
+        case KeyEvent.VK_UP, KeyEvent.VK_W:
+            model.RotatePiece();
+            break;
+  
+        case KeyEvent.VK_Q:
+            ExitVerification();
+            break;
+    }
+    view.repaint();
+}
+```
+Все понятно, скажу только что после ЛЮБОГО действия вызывается 
+`view.repaint()`.
+
+### 7.3 Пауза и продолжение игры 
+```java
+public void PauseGame() {
+    model.SetPause(true);
+    timer_panel.StopTimer();
+}
+
+public void ResumeGame() {
+    model.SetPause(false);
+    timer_panel.StartTimer();
+}
+```
+Метод `PauseGame()` используется каждый раз когда игрок выбирает какое-то
+действие (NewGame, Scores и т.д.), а `ResumeGame()` будет вызываться
+при выходе из окон выбранных комманд.
+> [!NOTE] мб добавить надпись куда-нибудь что типа "Game Paused" 
+> но пока все примитивно вряд ли стоит.
+
+### 7.4 Первый метод доступный игроку `StartNewGame`
+```java
+public void StartNewGame() {
+    PauseGame();
+    int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to start new game?", "New Game Confirmation", JOptionPane.YES_NO_OPTION);
+    if (result == JOptionPane.YES_OPTION) {
+        System.out.println("New game started");
+
+        if (player_name != null) {
+            hs.AddScore(player_name, model.GetScore(), timer_panel.GetElapsedTime());
+        }
+        player_name = JOptionPane.showInputDialog(null, "Enter your username: ", "New Game", JOptionPane.QUESTION_MESSAGE);
+
+        model.Reset();
+        view.repaint();
+        timer_panel.ResetTimer();
+        timer_panel.StartTimer();
+    } else {
+        ResumeGame();
+    }
+}
+```
+Ну при нажатии на эту команду игра ставится на паузу и вылазит `JOptionPane`
+с вопросом действительно ли начать заново?
+ - Если "да", то если рекорд игрока еще не в файле `highscores.txt` то
+он туда занесется, затем игрока опять спрашивают его имя, перерисовываем 
+поле, обновляем таймер игры и запускаем его.
+> Напоминаю что конструктор TimerPanel() уже срабатывал и таймер не изменился:
+> ```java
+> timer = new Timer(1000, new ActionListener() {
+>     @Override
+>     public void actionPerformed(ActionEvent e) {
+>         elapsed_time++;
+>         timer_label.setText("Time: " + elapsed_time);
+>     }
+> });
+> ```
+ - Если "нет", то просто снимаем паузу и продолжаем.
+
+Остальные методы работают по схожей логике:
+ставим игру на паузу и показываем игроку то, что он выбрал, затем продолжаем
+игру сняв паузу.
+
+## 8 `TetrisMenuBar.java`
+```java
+public class TetrisMenuBar extends JMenuBar {
+    public TetrisMenuBar(TetrisController controller) {
+        JMenu game_menu = new JMenu("Game");
+        JMenuItem new_game_item = new JMenuItem("New Game");
+        JMenuItem exit_item = new JMenuItem("Exit");
+        JMenuItem high_scores_item = new JMenuItem("High Scores");
+        JMenuItem about = new JMenuItem("About");
+
+        new_game_item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controller.StartNewGame();
+            }
+        });
+
+        high_scores_item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controller.ShowHighScores();
+            }
+        });
+
+        exit_item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controller.ExitVerification();
+            }
+        });
+
+        about.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                controller.ShowAbout();
+            }
+        });
+
+        game_menu.add(new_game_item);
+        game_menu.add(high_scores_item);
+        game_menu.add(about);
+        game_menu.add(exit_item);
+
+        add(game_menu);
+    }
+}
+```
+Этот класс напрямую связан с классом `TetrisController`.
+Создаем объект класса `JMenu` и добавляем к нему 4 объекта `JMenuItem`.
+Это и есть объекты которые может выбрать игрок.  
+Для каждого объекта `JMenuItem` создается обработчик событий
+`ActionListener`, который вызывает соответствующий метод
+из `TetrisController` (пункт 7 выше).
+
+Опять обращаю внимание что `class TetrisMenuBar extends JMenuBar` а значит, 
+что объект `JMenu` мы в самой последней строке добавляем в `JMenuBar`:
+```java
+add(game_menu);
+```
+> Хороший пример работы с классами `JMenuBar, JMenu` можно посмотреть [здесь](https://www.javatpoint.com/java-jmenuitem-and-jmenu).
+  
+Также для добавления обработчика событий можно использовать лямбда-выражения.
+То есть вместо: 
+```java
+new_game_item.addActionListener(new ActionListener() {
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        controller.StartNewGame();
+    }
+});
+```
+Можно писать так:
+```java
+new_game_item.addActionListener(e -> controller.StartNewGame());
+```
+И выполняется абсолютно 1 в 1.
+
+## 9 Главный класс `Main.java`
+```java
+public class Main {
+    public static void main(String[] args) {
+        TetrisModel model = new TetrisModel(10, 20); // Model
+        TetrisView view = new TetrisView(model); // View
+        HighScores hs = new HighScores();
+        TimerPanel timer_panel = new TimerPanel();
+        ScorePanel score_panel = new ScorePanel(model);
+        TetrisController controller = new TetrisController(model, view, hs, timer_panel); // Controller
+
+        JFrame frame = new JFrame("Tetris");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        frame.setSize(view.GetCellSize() * model.GetWidth() + 12, view.GetCellSize() * model.GetHeight() + 90);
+        frame.setResizable(false);
+
+        frame.setLayout(new BorderLayout());
+        frame.add(view, BorderLayout.CENTER);
+        frame.add(score_panel, BorderLayout.SOUTH);
+        frame.add(timer_panel, BorderLayout.NORTH);
+        frame.addKeyListener(controller);
+
+        TetrisMenuBar menu_bar = new TetrisMenuBar(controller);
+        frame.setJMenuBar(menu_bar);
+
+        frame.setVisible(true);
+
+        while (!model.IsGameOver()) {
+            try {
+                Thread.sleep(500);
+                model.MovePieceDown();
+                view.repaint();
+                score_panel.UpdateScore();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        System.out.println("GAME OVER!");
     }
 }
 ```
