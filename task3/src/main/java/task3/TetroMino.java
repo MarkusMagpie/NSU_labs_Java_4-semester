@@ -2,13 +2,7 @@ package task3;
 
 import java.awt.*;
 
-// Tetromino class
-// represents a tetromino figure in game
-// any figure has 4 blocks
-
-// coordinates - array of points that define the figure
-// color - color of the figure
-// rotate - function that rotates the figure
+// coordinates - array of Points that define the figure's position
 
 public class TetroMino {
     private final Point[] coordinates;

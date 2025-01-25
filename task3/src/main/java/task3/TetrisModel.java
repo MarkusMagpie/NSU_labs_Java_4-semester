@@ -76,10 +76,9 @@ public class TetrisModel {
                 p.y += 1;
             }
         } else {
-            PlacePiece(); // update coords at board
-            SpawnPiece();
-            if (!CanMove(current_piece, 0, 0)) {
-//                System.out.println("GAME OVER at MovePieceDown");
+            PlacePiece(); // обновляем координаты в двусвязном массиве board
+            SpawnPiece(); // ТОЛЬКО выбор новой current_piece случайным образом
+            if (!CanMove(current_piece, 0, 0)) { // если нельзя двигаться вниз, то игрок проиграл
                 JOptionPane.showMessageDialog(null, "GAME OVER", "Error", JOptionPane.ERROR_MESSAGE);
                 System.exit(0);
             }
@@ -112,7 +111,7 @@ public class TetrisModel {
         current_piece.rotate();
         // check if we can't rotate, return to original position
         if (!CanMove(current_piece, 0, 0)) {
-            System.out.println("Cannot rotate object");
+            System.out.println("Cannot rotate object:" + current_piece);
 //            JOptionPane.showMessageDialog(null, "Cannot rotate object", "Error", JOptionPane.ERROR_MESSAGE);
             current_piece.rotate();
             current_piece.rotate();
