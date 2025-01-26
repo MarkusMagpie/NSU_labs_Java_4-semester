@@ -105,6 +105,7 @@ sorted_words.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
   
 Пример с которого я писал лямбда-выражение [здесь](https://www.javatpoint.com/java-list-sort-lambda).
 
+[Здесь](https://www.w3schools.com/java/java_advanced_sorting.asp) хорошо написано про интерфейс `Comparator`. 
 ### 1.4 Метод `main`
 ```java
 public static void main(String[] args) {

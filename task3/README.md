@@ -1354,9 +1354,16 @@ new_game_item.addActionListener(new ActionListener() {
 ```
 Можно писать так:
 ```java
-new_game_item.addActionListener(e -> controller.StartNewGame());
+new_game_item.addActionListener((e) -> controller.StartNewGame());
 ```
-И выполняется абсолютно 1 в 1.
+Здесь мы применяем лямбда-выражение.  
+Лямбда-выражение не выполняется само по себе, а образует реализацию 
+метода, определенного в функциональном интерфейсе ([ActionListener](https://docs.oracle.com/javase/8/docs/api/?java/awt/event/ActionListener.html) 
+является функциональным интерфейсом).  
+При этом важно, что функциональный интерфейс должен содержать только
+один единственный метод без реализации ([actionPerformed](https://docs.oracle.com/javase/8/docs/api/java/awt/event/ActionListener.html#actionPerformed-java.awt.event.ActionEvent-) 
+единственный такой метод интерфейса `ActionListener`).  
+То есть лямбда-вырадение выполняет как раз метод `actionPerformed(ActionEvent e)`.
 
 ## 9 Главный класс `Main.java`
 ```java

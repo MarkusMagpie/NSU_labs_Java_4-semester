@@ -50,7 +50,12 @@ public class WordFrequencyAnalyzer {
     private void writeToCSV(Map<String, Integer> word_frequency, String output_file) {
         // создаем список из Map.Entry<String, Integer> и сортируем его в порядке убывания
         List<Map.Entry<String, Integer>> sorted_words = new ArrayList<>(word_frequency.entrySet()); // entrySet возвращает Set всех элементов Map (пар)
-        sorted_words.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
+//        sorted_words.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
+        sorted_words.sort((e1, e2) -> {
+            Integer frequency1 = e1.getValue();
+            Integer frequency2 = e2.getValue();
+            return frequency2.compareTo(frequency1);
+        });
 
         try (PrintWriter writer = new PrintWriter(new FileOutputStream(output_file))) {
             writer.println("Слово,Частота,Частота (%)");
