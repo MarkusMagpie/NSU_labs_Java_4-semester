@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import task2.ExecutionContext;
@@ -8,15 +9,22 @@ import java.util.EmptyStackException;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MetaTests {
+    private ExecutionContext context;
+    private DefineCommand define_command;
+    private PushCommand push_command;
+
+    @BeforeEach
+    void setUp() {
+        context = new ExecutionContext();
+        define_command = new DefineCommand();
+        push_command = new PushCommand();
+    }
+
     @Test
     void Test1() {
-        ExecutionContext context = new ExecutionContext();
-
-        DefineCommand define_command = new DefineCommand();
         define_command.Execute(context, new String[]{"x", "4.0"});
         assertEquals(4.0, context.GetVariables().get("x"));
 
-        PushCommand push_command = new PushCommand();
         push_command.Execute(context, new String[]{"x"});
         assertEquals(1, context.GetStack().size());
 
@@ -33,13 +41,9 @@ public class MetaTests {
 
     @Test
     void Test2_NegativeSqrt() {
-        ExecutionContext context = new ExecutionContext();
-
-        DefineCommand define_command = new DefineCommand();
         define_command.Execute(context, new String[]{"x", "-4.0"});
         assertEquals(-4.0, context.GetVariables().get("x"));
 
-        PushCommand push_command = new PushCommand();
         push_command.Execute(context, new String[]{"x"});
         assertEquals(1, context.GetStack().size());
 
@@ -49,21 +53,15 @@ public class MetaTests {
 
     @Test
     void Test3_SqrtThrows() {
-        ExecutionContext context = new ExecutionContext();
-
         SqrtCommand sqrt_command = new SqrtCommand();
         assertThrows(EmptyStackException.class, () -> sqrt_command.Execute(context, new String[]{}));
     }
 
     @Test
     void Test4_AddThrows() {
-        ExecutionContext context = new ExecutionContext();
-
-        DefineCommand define_command = new DefineCommand();
         define_command.Execute(context, new String[]{"x", "10.0"});
         assertEquals(10.0, context.GetVariables().get("x"));
 
-        PushCommand push_command = new PushCommand();
         push_command.Execute(context, new String[]{"x"});
         assertEquals(1, context.GetStack().size());
 
@@ -73,13 +71,9 @@ public class MetaTests {
 
     @Test
     void Test5_SubThrows() {
-        ExecutionContext context = new ExecutionContext();
-
-        DefineCommand define_command = new DefineCommand();
         define_command.Execute(context, new String[]{"x", "10.0"});
         assertEquals(10.0, context.GetVariables().get("x"));
 
-        PushCommand push_command = new PushCommand();
         push_command.Execute(context, new String[]{"x"});
         assertEquals(1, context.GetStack().size());
 
@@ -89,18 +83,14 @@ public class MetaTests {
 
     @Test
     void Test6_MulThrows() {
-        ExecutionContext context = new ExecutionContext();
-
-        DefineCommand defineCommand = new DefineCommand();
-        defineCommand.Execute(context, new String[]{"x", "10.0"});
-        defineCommand.Execute(context, new String[]{"y", "5.0"});
+        define_command.Execute(context, new String[]{"x", "10.0"});
+        define_command.Execute(context, new String[]{"y", "5.0"});
         assertEquals(10.0, context.GetVariables().get("x"));
         assertEquals(5.0, context.GetVariables().get("y"));
 
-        PushCommand pushCommand = new PushCommand();
-        pushCommand.Execute(context, new String[]{"x"});
+        push_command.Execute(context, new String[]{"x"});
         assertEquals(1, context.GetStack().size());
-        pushCommand.Execute(context, new String[]{"y"});
+        push_command.Execute(context, new String[]{"y"});
         assertEquals(2, context.GetStack().size());
 
         AddCommand addCommand = new AddCommand();
@@ -115,18 +105,14 @@ public class MetaTests {
 
     @Test
     void Test7_DivThrows() {
-        ExecutionContext context = new ExecutionContext();
-
-        DefineCommand defineCommand = new DefineCommand();
-        defineCommand.Execute(context, new String[]{"x", "20.0"});
-        defineCommand.Execute(context, new String[]{"y", "5.0"});
+        define_command.Execute(context, new String[]{"x", "20.0"});
+        define_command.Execute(context, new String[]{"y", "5.0"});
         assertEquals(20.0, context.GetVariables().get("x"));
         assertEquals(5.0, context.GetVariables().get("y"));
 
-        PushCommand pushCommand = new PushCommand();
-        pushCommand.Execute(context, new String[]{"x"});
+        push_command.Execute(context, new String[]{"x"});
         assertEquals(1, context.GetStack().size());
-        pushCommand.Execute(context, new String[]{"y"});
+        push_command.Execute(context, new String[]{"y"});
         assertEquals(2, context.GetStack().size());
 
         PopCommand pop_command = new PopCommand();
@@ -141,8 +127,6 @@ public class MetaTests {
 
     @Test
     void Test8_EmptyStack() {
-        ExecutionContext context = new ExecutionContext();
-
         AddCommand add_command = new AddCommand();
         assertThrows(IllegalArgumentException.class, () -> add_command.Execute(context, new String[]{}));
 //        IllegalArgumentException exception =
@@ -160,18 +144,14 @@ public class MetaTests {
 
     @Test
     void Test9_DivisionByZero() {
-        ExecutionContext context = new ExecutionContext();
-
-        DefineCommand defineCommand = new DefineCommand();
-        defineCommand.Execute(context, new String[]{"a", "100.0"});
+        define_command.Execute(context, new String[]{"a", "100.0"});
         assertEquals(100.0, context.GetVariables().get("a"));
-        defineCommand.Execute(context, new String[]{"b", "0.0"});
+        define_command.Execute(context, new String[]{"b", "0.0"});
         assertEquals(0.0, context.GetVariables().get("b"));
 
-        PushCommand pushCommand = new PushCommand();
-        pushCommand.Execute(context, new String[]{"a"});
+        push_command.Execute(context, new String[]{"a"});
         assertEquals(1, context.GetStack().size());
-        pushCommand.Execute(context, new String[]{"b"});
+        push_command.Execute(context, new String[]{"b"});
         assertEquals(2, context.GetStack().size());
 
         DivCommand divCommand = new DivCommand();
@@ -180,14 +160,11 @@ public class MetaTests {
 
     @Test
     void Test10_DefineThrows() {
-        ExecutionContext context = new ExecutionContext();
+        // define требует 2 аргумента
+        assertThrows(IllegalArgumentException.class, () -> define_command.Execute(context, new String[]{"a"}));
 
-        DefineCommand defineCommand = new DefineCommand(); // define требует 2 аргумента
-        assertThrows(IllegalArgumentException.class, () -> defineCommand.Execute(context, new String[]{"a"}));
-
-        PushCommand pushCommand = new PushCommand();
-        defineCommand.Execute(context, new String[]{"a", "100.0"});
-        pushCommand.Execute(context, new String[]{"a"});
-        assertThrows(IllegalArgumentException.class, () -> defineCommand.Execute(context, new String[]{"a"}));
+        define_command.Execute(context, new String[]{"a", "100.0"});
+        push_command.Execute(context, new String[]{"a"});
+        assertThrows(IllegalArgumentException.class, () -> define_command.Execute(context, new String[]{"a"}));
     }
 }
