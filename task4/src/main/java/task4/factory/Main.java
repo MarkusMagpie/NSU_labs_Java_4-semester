@@ -55,11 +55,9 @@ public class Main {
             threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
         }
 
-        if (configLoader.isLogEnabled()) {
-            try (FileWriter writer = new FileWriter("task4\\src\\main\\resources\\factorylog.txt", false)) {
-            } catch (Exception e) {
-                System.out.println("Failed to clear log file: " + e.getMessage());
-            }
+        try (FileWriter writer = new FileWriter("task4\\src\\main\\resources\\factorylog.txt", false)) {
+        } catch (Exception e) {
+            System.out.println("Failed to clear log file: " + e.getMessage());
         }
 
         // задачи дилеров
