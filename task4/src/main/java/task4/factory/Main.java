@@ -69,21 +69,43 @@ public class Main {
             thread.start();
         }
 
-//        try {
-//            Thread.sleep(10000);
-//        } catch (InterruptedException e) {
-//            Thread.currentThread().interrupt();
-//        }
-//
-//        // завершаем работы поставщиков и дилеров
-//        for (Thread thread : supplierThreads) {
-//            thread.interrupt();
-//        }
-//        for (Thread thread : dealerThreads) {
-//            thread.interrupt();
-//        }
-//
-//        // завершаем работу пула потоков
-//        threadPool.shutdown();
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        System.out.println("\nFactory finished working for requested time. Waiting for threads to finish...\n");
+
+        for (Thread thread : supplierThreads) {
+            thread.interrupt();
+        }
+        for (Thread thread : dealerThreads) {
+            thread.interrupt();
+        }
+
+        // ожидаем завершение работы поставщиков и дилеров
+        for (Thread thread : supplierThreads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        for (Thread thread : dealerThreads) {
+            try {
+                thread.join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        System.out.println("\nSupplier and dealer threads finished. Waiting for thread pool to finish...\n");
+
+        // завершаем работу пула потоков
+        threadPool.shutdown();
+
+        System.out.println("\nThread pool finished. Exiting...\n");
     }
 }

@@ -20,22 +20,25 @@ public class ThreadPool {
     }
 
     public synchronized void addTask(Task task) {
-        task_queue.add(task);
-        notify();
+        if (is_running) {
+            task_queue.add(task);
+            notify(); // разбудить поток в состоянии ожидания
+        }
     }
 
     private void workerLoop() {
-        while (is_running) {
+        while (is_running || !task_queue.isEmpty()) {
             Task task;
             synchronized (this) {
-                while (task_queue.isEmpty() && is_running) {
+                while (is_running && task_queue.isEmpty()) {
                     try {
                         wait();
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
+                        return;
                     }
                 }
-                if (task_queue.isEmpty() && !is_running) {
+                if (!is_running && task_queue.isEmpty()) {
                     return;
                 }
                 task = task_queue.poll();
@@ -50,6 +53,9 @@ public class ThreadPool {
         is_running = false;
         synchronized (this) {
             notifyAll();
+        }
+        for (Thread thread : threads) {
+            thread.interrupt();
         }
         // все потоки, которые находились в состоянии ожидания, просыпаются и проверяют условие цикла.
         // Поскольку is_running теперь false, они завершают работу

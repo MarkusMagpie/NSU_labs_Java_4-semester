@@ -16,18 +16,32 @@ public class Worker implements Runnable {
 
     @Override
     public void run() {
-        try {
-            while (!Thread.currentThread().isInterrupted()) {
+//        try {
+//            while (!Thread.currentThread().isInterrupted()) {
+//                Body body = body_storage.get();
+//                Motor motor = motor_storage.get();
+//                Accessory accessory = accessory_storage.get();
+//
+//                Car car = new Car(++car_counter, body, motor, accessory);
+//                car_storage.add(car);
+////                System.out.println("Assembled: " + car.toString() + " with id " + car.getId());
+//            }
+//        } catch (InterruptedException e) {
+//            Thread.currentThread().interrupt();
+//        }
+
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
                 Body body = body_storage.get();
                 Motor motor = motor_storage.get();
                 Accessory accessory = accessory_storage.get();
 
                 Car car = new Car(++car_counter, body, motor, accessory);
                 car_storage.add(car);
-//                System.out.println("Assembled: " + car.toString() + " with id " + car.getId());
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
             }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
         }
     }
 }
