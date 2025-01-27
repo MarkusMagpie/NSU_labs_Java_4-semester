@@ -84,22 +84,22 @@ public class Main {
             thread.interrupt();
         }
 
-        // ожидаем завершение работы поставщиков и дилеров
-        for (Thread thread : supplierThreads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
-
-        for (Thread thread : dealerThreads) {
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
+//        // ожидаем завершение работы поставщиков и дилеров
+//        for (Thread thread : supplierThreads) {
+//            try {
+//                thread.join();
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//            }
+//        }
+//
+//        for (Thread thread : dealerThreads) {
+//            try {
+//                thread.join();
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//            }
+//        }
 
         System.out.println("\nSupplier and dealer threads finished. Waiting for thread pool to finish...\n");
 
