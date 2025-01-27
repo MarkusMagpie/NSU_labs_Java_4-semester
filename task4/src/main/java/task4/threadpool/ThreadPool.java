@@ -7,15 +7,15 @@ import java.util.Queue;
 
 public class ThreadPool {
     private final Queue<Task> task_queue = new LinkedList<>();
-    private final List<Thread> workers;
+    private final List<Thread> threads;
     private volatile boolean is_running = true;
 
     public ThreadPool(int num_threads) {
-        workers = new ArrayList<>();
-        for (int i = 0; i < num_threads; i++) {
-            Thread worker = new Thread(this::workerLoop, "worker-" + i);
-            workers.add(worker);
-            worker.start();
+        threads = new ArrayList<>();
+        for (int i = 0; i < num_threads; ++i) {
+            Thread thread = new Thread(this::workerLoop);
+            threads.add(thread);
+            thread.start();
         }
     }
 
@@ -51,12 +51,18 @@ public class ThreadPool {
         synchronized (this) {
             notifyAll();
         }
-        for (Thread worker : workers) {
+        // все потоки, которые находились в состоянии ожидания, просыпаются и проверяют условие цикла.
+        // Поскольку is_running теперь false, они завершают работу
+        for (Thread thread : threads) {
             try {
-                worker.join();
+                thread.join();
+                // все рабочие потоки завершат выполнение своих задач перед тем, как метод shutdown() завершится
+                // если поток вызывающий join будет прерван, то будет исключение
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
     }
+
+
 }

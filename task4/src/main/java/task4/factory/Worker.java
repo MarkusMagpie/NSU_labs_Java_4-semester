@@ -24,7 +24,7 @@ public class Worker implements Runnable {
 
                 Car car = new Car(++car_counter, body, motor, accessory);
                 car_storage.add(car);
-                System.out.println("Assembled: " + car.toString() + " with id " + car.getId());
+//                System.out.println("Assembled: " + car.toString() + " with id " + car.getId());
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

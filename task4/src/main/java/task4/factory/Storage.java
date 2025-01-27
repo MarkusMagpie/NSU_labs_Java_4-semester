@@ -19,7 +19,7 @@ class Storage<T extends Part> {
         //  while - для повторной проверки условия после пробуждения потока
 
         items.add(item);
-        System.out.println("Added to storage: " + item + " with id " + item.getId() + " by " + Thread.currentThread().getName());
+        System.out.println("Added to Storage: " + item + " with id " + item.getId() + " by " + Thread.currentThread().getName());
         notifyAll();
     }
     // synchronized - только один поток может выполнять синхронизированный метод одновременно.
@@ -30,6 +30,7 @@ class Storage<T extends Part> {
         }
 
         T item = items.poll();
+        System.out.println("Got from Storage: " + item + " with id " + item.getId() + " by " + Thread.currentThread().getName());
         notifyAll();
 
         return item;

@@ -18,7 +18,7 @@ class Supplier<T extends Part> implements Runnable {
             while (!Thread.currentThread().isInterrupted()) {
                 T part = createPart();
                 storage.add(part);
-                System.out.println("Supplier produced: " + part + " with id " + part.getId());
+//                System.out.println("Supplier produced: " + part + " with id " + part.getId());
                 Thread.sleep(delay); // между созданием деталей должна быть воображаемая задержка
             }
         } catch (InterruptedException e) {
@@ -28,7 +28,7 @@ class Supplier<T extends Part> implements Runnable {
 
     public T createPart() {
         try {
-            return part_type.getConstructor(Integer.TYPE).newInstance(++id_counter);
+            return part_type.getConstructor(int.class).newInstance(++id_counter);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create part " + part_type + " with id " + id_counter, e);
         }

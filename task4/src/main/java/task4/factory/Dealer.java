@@ -3,6 +3,9 @@ package task4.factory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.FileWriter;
+import java.io.PrintWriter;
+
 class Dealer implements Runnable {
     private static final Logger logger = LogManager.getLogger(Dealer.class);
 
@@ -23,11 +26,7 @@ class Dealer implements Runnable {
             while (!Thread.currentThread().isInterrupted()) {
                 Car car = car_storage.get();
                 System.out.println("Sold: " + car.toString() + " with id " + car.getId());
-
-                if (log_enabled) {
-                    writeLog(car);
-                }
-
+                if (log_enabled) { writeLog(car); }
                 Thread.sleep(delay);
             }
         } catch (InterruptedException e) {
@@ -36,11 +35,12 @@ class Dealer implements Runnable {
     }
 
     private void writeLog(Car car) {
-        String message = String.format("%d: Dealer: Auto %d (Body: %d, Motor: %d, Accessory: %d)",
+        String message = String.format("%d: Dealer: Car %d (Body: %d, Motor: %d, Accessory: %d)",
                 System.currentTimeMillis(), car.getId(),
                 car.getBody().getId(), car.getMotor().getId(),
                 car.getAccessory().getId());
 
         logger.info(message);
+//        System.out.println(message);
     }
 }
