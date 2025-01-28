@@ -30,7 +30,7 @@ public class Main {
         Storage<Car> carStorage = new Storage<>(configLoader.getStorageCarSize());
 
         // запуск поставщиков кузовов в отдельных потоках
-        int body_supplier_delay = 3000;
+        int body_supplier_delay = 4000;
         for (int i = 0; i < configLoader.getBodySuppliers(); ++i) {
 //            new Thread(new Supplier<>(bodyStorage, 500, Body.class)).start();
             Supplier<Body> supplier = new Supplier<>(bodyStorage, body_supplier_delay, Body.class);
@@ -41,7 +41,7 @@ public class Main {
         }
 
         // задачи поставщиков двигателей
-        int motor_supplier_delay = 3000;
+        int motor_supplier_delay = 4000;
         for (int i = 0; i < configLoader.getMotorSuppliers(); ++i) {
 //            new Thread(new Supplier<>(motorStorage, 500, Motor.class)).start();
             Supplier<Motor> supplier = new Supplier<>(motorStorage, motor_supplier_delay, Motor.class);
@@ -52,7 +52,7 @@ public class Main {
         }
 
         // задачи поставщиков аксессуаров
-        int accessory_supplier_delay = 3000;
+        int accessory_supplier_delay = 4000;
         for (int i = 0; i < configLoader.getAccessorySuppliers(); ++i) {
 //            new Thread(new Supplier<>(accessoryStorage, 500, Accessory.class)).start();
             Supplier<Accessory> supplier = new Supplier<>(accessoryStorage, accessory_supplier_delay, Accessory.class);
@@ -76,7 +76,7 @@ public class Main {
         }
 
         // задачи дилеров
-        int dealer_delay = 4000;
+        int dealer_delay = 5000;
         for (int i = 0; i < configLoader.getDealers(); ++i) {
 //            new Thread(new Dealer(carStorage, 1000, configLoader.isLogEnabled())).start();
             Dealer dealer = new Dealer(carStorage, dealer_delay, configLoader.isLogEnabled());
