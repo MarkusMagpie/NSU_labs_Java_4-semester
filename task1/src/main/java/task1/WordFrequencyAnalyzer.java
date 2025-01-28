@@ -47,7 +47,7 @@ public class WordFrequencyAnalyzer {
         return word_frequency;
     }
 
-    private void writeToCSV(Map<String, Integer> word_frequency, String output_file) {
+    public void writeToCSV(Map<String, Integer> word_frequency, String output_file) {
         // создаем список из Map.Entry<String, Integer> и сортируем его в порядке убывания
         List<Map.Entry<String, Integer>> sorted_words = new ArrayList<>(word_frequency.entrySet()); // entrySet возвращает Set всех элементов Map (пар)
 //        sorted_words.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
@@ -70,30 +70,6 @@ public class WordFrequencyAnalyzer {
         } catch (IOException e) {
             System.out.println("Error while writing to CSV file: " + e.getMessage());
             logger.error("Ошибка при записи в CSV-файл: " + e.getMessage());
-        }
-    }
-
-    public static void main(String[] args) {
-        if (args.length != 1) {
-            System.out.println("Error: please specify input file name as a single argument.");
-            logger.error("Неверное количество аргументов: " + args.length);
-            return;
-        }
-
-        String input_file = args[0];
-        WordFrequencyAnalyzer analyzer = new WordFrequencyAnalyzer();
-
-        try {
-            Map<String, Integer> word_frequency = analyzer.analyzeFile(input_file);
-
-            // создание выходного CSV файла
-            String output_file = "task1/src/main/resources/output.csv";
-            analyzer.writeToCSV(word_frequency, output_file);
-
-//            System.out.println("Created CSV file: " + output_file);
-            logger.info("CSV-файл создан: " + output_file);
-        } catch (IOException e) {
-            System.out.println("Error while reading file: " + input_file + ": " + e.getMessage());
         }
     }
 }
