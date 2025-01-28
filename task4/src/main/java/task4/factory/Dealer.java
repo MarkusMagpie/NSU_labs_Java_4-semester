@@ -3,21 +3,24 @@ package task4.factory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.FileWriter;
-import java.io.PrintWriter;
+import java.util.concurrent.atomic.AtomicInteger;
 
-class Dealer implements Runnable {
+public class Dealer implements Runnable {
     private static final Logger logger = LogManager.getLogger(Dealer.class);
-
     private final Storage<Car> car_storage;
-    private final int delay;
-
+    private volatile int delay;
     private final boolean log_enabled;
+    private int sold_cars = 0;
 
     public Dealer(Storage<Car> car_storage, int delay, boolean log_enabled) {
         this.car_storage = car_storage;
         this.delay = delay;
         this.log_enabled = log_enabled;
+    }
+
+    public void setDelay(int delay) {
+        this.delay = delay;
+//        System.out.println("\nNew Dealer delay: " + delay);
     }
 
     @Override
@@ -35,7 +38,9 @@ class Dealer implements Runnable {
 
         while (!Thread.currentThread().isInterrupted()) {
             try {
+//                System.out.println("\nDealer's delay: " + delay);
                 Car car = car_storage.get();
+                sold_cars++;
                 System.out.println("Sold: " + car.toString() + " with id " + car.getId());
                 if (log_enabled) { writeLog(car); }
                 Thread.sleep(delay);
@@ -53,6 +58,9 @@ class Dealer implements Runnable {
                 car.getAccessory().getId());
 
         logger.info(message);
-//        System.out.println(message);
+    }
+
+    public int getSoldCars() {
+        return sold_cars;
     }
 }

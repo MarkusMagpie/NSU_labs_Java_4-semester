@@ -70,5 +70,7 @@ public class ThreadPool {
         }
     }
 
-
+    public int getTaskCount() {
+        return task_queue.size();
+    }
 }

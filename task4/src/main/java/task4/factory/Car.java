@@ -1,6 +1,6 @@
 package task4.factory;
 
-class Car extends Part{
+public class Car extends Part{
     private final Body body;
     private final Motor motor;
     private final Accessory accessory;

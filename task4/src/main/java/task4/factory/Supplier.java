@@ -1,8 +1,8 @@
 package task4.factory;
 
-class Supplier<T extends Part> implements Runnable {
+public class Supplier<T extends Part> implements Runnable {
     private final Storage<T> storage;
-    private final int delay; // задержка (в миллисекундах) между созданием и добавлением каждой детали
+    private volatile int delay; // задержка (в миллисекундах) между созданием и добавлением каждой детали
     private final Class<T> part_type; // класс типа T(Body, Monitor или Accessory), который будет создаваться
     private static int id_counter = 0;
 
@@ -10,6 +10,11 @@ class Supplier<T extends Part> implements Runnable {
         this.storage = storage;
         this.delay = delay;
         this.part_type = part_type;
+    }
+
+    public void setDelay(int delay) {
+//        System.out.println("\nNew Supplier delay: " + delay);
+        this.delay = delay;
     }
 
     @Override

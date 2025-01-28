@@ -3,7 +3,7 @@ package task4.factory;
 import java.util.LinkedList;
 import java.util.Queue;
 
-class Storage<T extends Part> {
+public class Storage<T extends Part> {
     private final Queue<T> items = new LinkedList<>(); // LinkedList реализует интерфейс Queue
     private final int capacity;
 
@@ -20,6 +20,7 @@ class Storage<T extends Part> {
 
         items.add(item);
         System.out.println("Added to Storage: " + item + " with id " + item.getId() + " by " + Thread.currentThread().getName());
+//        System.out.println("Storage current size: " + items.size());
         notifyAll();
     }
     // synchronized - только один поток может выполнять синхронизированный метод одновременно.
@@ -34,5 +35,9 @@ class Storage<T extends Part> {
         notifyAll();
 
         return item;
+    }
+
+    public int getCurrentSize() {
+        return items.size();
     }
 }
