@@ -40,7 +40,7 @@ public class Dealer implements Runnable {
             try {
 //                System.out.println("\nDealer's delay: " + delay);
                 Car car = car_storage.get();
-                sold_cars++;
+                ++sold_cars;
                 System.out.println("Sold: " + car.toString() + " with id " + car.getId());
                 if (log_enabled) { writeLog(car); }
                 Thread.sleep(delay);

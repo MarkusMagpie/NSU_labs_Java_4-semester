@@ -95,9 +95,7 @@ public class Main {
         Timer timer = new Timer(1000, e -> {
             int total_sold_cars = 0;
             for (Dealer dealer : dealers) {
-                if (carStorage.getCurrentSize() > 0) {
-                    total_sold_cars += dealer.getSoldCars();
-                }
+                total_sold_cars += dealer.getSoldCars();
             }
             gui.updateStats(
                     bodyStorage.getCurrentSize(),
