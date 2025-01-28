@@ -27,6 +27,7 @@ public class FactoryGUI extends JFrame {
     private final JLabel car_storage_label;
 
     private final JLabel sold_cars_label;
+    private final JProgressBar car_storage_pb;
 
     private final int body_storage_capacity;
     private final int motor_storage_capacity;
@@ -82,6 +83,12 @@ public class FactoryGUI extends JFrame {
         accessory_storage_label.setFont(new Font("Arial", Font.BOLD, 14));
         car_storage_label = new JLabel("Car storage: 0/" + car_storage_capacity, JLabel.LEFT);
         car_storage_label.setFont(new Font("Arial", Font.BOLD, 14));
+        car_storage_pb = new JProgressBar(0, car_storage_capacity);
+        car_storage_pb.setStringPainted(true);
+        car_storage_pb.setFont(new Font("Arial", Font.ITALIC, 16));
+        car_storage_pb.setValue(0);
+        car_storage_pb.setString("0/" + car_storage_capacity);
+
         sold_cars_label = new JLabel("Sold cars: 0", JLabel.LEFT);
         sold_cars_label.setFont(new Font("Arial", Font.BOLD, 14));
 
@@ -89,6 +96,7 @@ public class FactoryGUI extends JFrame {
         stats_panel.add(motor_storage_label);
         stats_panel.add(accessory_storage_label);
         stats_panel.add(car_storage_label);
+        stats_panel.add(car_storage_pb);
         stats_panel.add(sold_cars_label);
 
         add(stats_panel, BorderLayout.CENTER);
@@ -190,5 +198,7 @@ public class FactoryGUI extends JFrame {
         accessory_storage_label.setText("Accessory storage: " + accessory_storage + "/" + accessory_storage_capacity);
         car_storage_label.setText("Car storage: " + car_storage + "/" + car_storage_capacity);
         sold_cars_label.setText("Sold cars: " + sold_cars);
+        car_storage_pb.setValue(car_storage);
+        car_storage_pb.setString(car_storage + "/" + car_storage_capacity);
     }
 }
