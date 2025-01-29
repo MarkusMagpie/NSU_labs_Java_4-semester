@@ -12,12 +12,6 @@ public class Car extends Part{
         this.accessory = accessory;
     }
 
-//    @Override
-//    public String toString() {
-//        return "Car: " + super.toString() + " (Body: " + body.getId() + ", Motor: " + motor.getId() + ", Accessory: "
-//                + accessory.getId() + ")";
-//    }
-
     public Body getBody() {
         return body;
     }

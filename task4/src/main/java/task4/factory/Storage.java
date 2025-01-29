@@ -20,7 +20,6 @@ public class Storage<T extends Part> {
 
         items.add(item);
         System.out.println("Added to Storage: " + item + " with id " + item.getId() + " by " + Thread.currentThread().getName());
-//        System.out.println("Storage current size: " + items.size());
         notifyAll();
     }
     // synchronized - только один поток может выполнять синхронизированный метод одновременно.

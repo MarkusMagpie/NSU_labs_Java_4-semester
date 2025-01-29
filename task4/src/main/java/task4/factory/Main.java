@@ -14,13 +14,13 @@ public class Main {
     public static void main(String[] args) {
         ConfigLoader configLoader = new ConfigLoader("task4\\src\\main\\resources\\config.properties");
 
-//        List<Thread> supplierThreads = new ArrayList<>();
         List<Supplier<Body>> body_suppliers = new ArrayList<>();
         List<Supplier<Motor>> motor_suppliers = new ArrayList<>();
         List<Supplier<Accessory>> accessory_suppliers = new ArrayList<>();
         List<Dealer> dealers = new ArrayList<>();
 
-        List<Thread> dealerThreads = new ArrayList<>();
+//        List<Thread> supplierThreads = new ArrayList<>();
+//        List<Thread> dealerThreads = new ArrayList<>();
 
         // Создаем хранилища для всех трех видов деталей с вместительностью
         //   из конфигурационного файла. + еще одно хранилище для автомобилей
@@ -32,7 +32,6 @@ public class Main {
         // запуск поставщиков кузовов в отдельных потоках
         int body_supplier_delay = 4000;
         for (int i = 0; i < configLoader.getBodySuppliers(); ++i) {
-//            new Thread(new Supplier<>(bodyStorage, 500, Body.class)).start();
             Supplier<Body> supplier = new Supplier<>(bodyStorage, body_supplier_delay, Body.class);
             Thread thread = new Thread(supplier);
 //            supplierThreads.add(thread);
@@ -43,7 +42,6 @@ public class Main {
         // задачи поставщиков двигателей
         int motor_supplier_delay = 4000;
         for (int i = 0; i < configLoader.getMotorSuppliers(); ++i) {
-//            new Thread(new Supplier<>(motorStorage, 500, Motor.class)).start();
             Supplier<Motor> supplier = new Supplier<>(motorStorage, motor_supplier_delay, Motor.class);
             Thread thread = new Thread(supplier);
 //            supplierThreads.add(thread);
@@ -54,7 +52,6 @@ public class Main {
         // задачи поставщиков аксессуаров
         int accessory_supplier_delay = 4000;
         for (int i = 0; i < configLoader.getAccessorySuppliers(); ++i) {
-//            new Thread(new Supplier<>(accessoryStorage, 500, Accessory.class)).start();
             Supplier<Accessory> supplier = new Supplier<>(accessoryStorage, accessory_supplier_delay, Accessory.class);
             Thread thread = new Thread(supplier);
 //            supplierThreads.add(thread);
@@ -78,11 +75,10 @@ public class Main {
         // задачи дилеров
         int dealer_delay = 5000;
         for (int i = 0; i < configLoader.getDealers(); ++i) {
-//            new Thread(new Dealer(carStorage, 1000, configLoader.isLogEnabled())).start();
             Dealer dealer = new Dealer(carStorage, dealer_delay, configLoader.isLogEnabled());
             Thread thread = new Thread(dealer);
             dealers.add(dealer);
-            dealerThreads.add(thread);
+//            dealerThreads.add(thread);
             thread.start();
         }
 
@@ -108,7 +104,7 @@ public class Main {
         timer.start();
 
 //        try {
-//            Thread.sleep(10000);
+//            Thread.sleep(15000);
 //        } catch (InterruptedException e) {
 //            Thread.currentThread().interrupt();
 //        }
@@ -127,6 +123,11 @@ public class Main {
 //        // завершаем работу пула потоков
 //        threadPool.shutdown();
 //
+//        gui.setVisible(false);
+//        timer.stop();
+//
 //        System.out.println("\nThread pool finished. Exiting...\n");
+//
+//        System.exit(0);
     }
 }

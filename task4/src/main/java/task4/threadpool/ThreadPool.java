@@ -22,7 +22,7 @@ public class ThreadPool {
     public synchronized void addTask(Task task) {
         if (is_running) {
             task_queue.add(task);
-            notify(); // разбудить поток в состоянии ожидания
+            notifyAll(); // разбудить поток в состоянии ожидания
         }
     }
 
@@ -43,9 +43,7 @@ public class ThreadPool {
                 }
                 task = task_queue.poll();
             }
-            if (task != null) {
-                task.execute();
-            }
+            task.execute();
         }
     }
 
@@ -68,9 +66,5 @@ public class ThreadPool {
                 Thread.currentThread().interrupt();
             }
         }
-    }
-
-    public int getTaskCount() {
-        return task_queue.size();
     }
 }

@@ -1,6 +1,6 @@
 # Отчет по 2 заданию "Стековый калькулятор"
 
-## 1.1 ExecutionContest.java
+## 1.1 Класс `ExecutionContest`
 ```java
 public class ExecutionContext {
     private final Stack<Double> stack = new Stack<>();
@@ -26,7 +26,7 @@ public class ExecutionContext {
 это ассоциативный массив для хранения переменных и их значений. 
 Значения из массива будут перемещаться в стек.
 
-## 1.2 Command.java
+## 1.2 Абстрактный интерфейс `Command`
 ```java
 public abstract class Command {
     public abstract void Execute(ExecutionContext context, String[] args) throws Exception;
@@ -44,7 +44,7 @@ public abstract class Command {
 `public abstract void Execute(ExecutionContext context, String[] args) throws Exception;`  
 принимает текущий контекст исполнения и аргументы для комманды (1 или 2).
   
-## 1.3 CommandFactory.java
+## 1.3 Класс `CommandFactory`
 ```java
 class CommandFactory {
     private static final Map<String, String> command_map = new HashMap<>();
@@ -151,7 +151,7 @@ public class DefineCommand extends Command {
 (`args[1]`). Затем сохраняем переменную и её значение в контекст выполнения
 с помощью метода [put(variable, value)](https://www.geeksforgeeks.org/hashmap-put-method-in-java/).
 
-## 1.5 Main.java
+## 1.5 Класс `Main`
 ```java
 public class Main {
     private static final Logger logger = Logger.getLogger(Main.class.getName());

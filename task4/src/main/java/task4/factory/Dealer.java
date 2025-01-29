@@ -25,30 +25,32 @@ public class Dealer implements Runnable {
 
     @Override
     public void run() {
-//        try {
-//            while (!Thread.currentThread().isInterrupted()) {
-//                Car car = car_storage.get();
-//                System.out.println("Sold: " + car.toString() + " with id " + car.getId());
-//                if (log_enabled) { writeLog(car); }
-//                Thread.sleep(delay);
-//            }
-//        } catch (InterruptedException e) {
-//            Thread.currentThread().interrupt();
-//        }
-
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
+        try {
+            while (!Thread.currentThread().isInterrupted()) {
 //                System.out.println("\nDealer's delay: " + delay);
                 Car car = car_storage.get();
                 ++sold_cars;
                 System.out.println("Sold: " + car.toString() + " with id " + car.getId());
                 if (log_enabled) { writeLog(car); }
                 Thread.sleep(delay);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+
+//        while (!Thread.currentThread().isInterrupted()) {
+//            try {
+////                System.out.println("\nDealer's delay: " + delay);
+//                Car car = car_storage.get();
+//                ++sold_cars;
+//                System.out.println("Sold: " + car.toString() + " with id " + car.getId());
+//                if (log_enabled) { writeLog(car); }
+//                Thread.sleep(delay);
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//                break;
+//            }
+//        }
     }
 
     private void writeLog(Car car) {

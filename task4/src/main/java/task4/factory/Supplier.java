@@ -19,27 +19,26 @@ public class Supplier<T extends Part> implements Runnable {
 
     @Override
     public void run() {
-//        try {
-//            while (!Thread.currentThread().isInterrupted()) {
-//                T part = createPart();
-//                storage.add(part);
-////                System.out.println("Supplier produced: " + part + " with id " + part.getId());
-//                Thread.sleep(delay); // между созданием деталей должна быть воображаемая задержка
-//            }
-//        } catch (InterruptedException e) {
-//            Thread.currentThread().interrupt();
-//        }
-
-        while (!Thread.currentThread().isInterrupted()) {
-            try {
+        try {
+            while (!Thread.currentThread().isInterrupted()) {
                 T part = createPart();
                 storage.add(part);
-                Thread.sleep(delay);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                break;
+                Thread.sleep(delay); // между созданием деталей должна быть воображаемая задержка
             }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
+
+//        while (!Thread.currentThread().isInterrupted()) {
+//            try {
+//                T part = createPart();
+//                storage.add(part);
+//                Thread.sleep(delay);
+//            } catch (InterruptedException e) {
+//                Thread.currentThread().interrupt();
+//                break;
+//            }
+//        }
     }
 
     public T createPart() {
