@@ -84,7 +84,7 @@ private void writeToCSV(Map<String, Integer> word_frequency, String output_file)
 ```
 Записывает данные о словах и их частотах в CSV-файл.  
 Здесь представляет интерес только применение лямбда-сортировки списка `sorted_words`:
-```angular2html
+```java
 List<Map.Entry<String, Integer>> sorted_words = new ArrayList<>(word_frequency.entrySet()); // entrySet возвращает Set всех элементов Map (пар)
 sorted_words.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
 ```
@@ -105,45 +105,38 @@ sorted_words.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
   
 Пример с которого я писал лямбда-выражение [здесь](https://www.javatpoint.com/java-list-sort-lambda).
 
-[Здесь](https://www.w3schools.com/java/java_advanced_sorting.asp) хорошо написано про интерфейс `Comparator`. 
-### 1.4 Метод `main`
-```java
-public static void main(String[] args) {
-    if (args.length != 1) {
-        System.out.println("Error: please specify input file name as a single argument.");
-        logger.error("Неверное количество аргументов: " + args.length);
-        return;
-    }
-
-    String input_file = args[0];
-    WordFrequencyAnalyzer analyzer = new WordFrequencyAnalyzer();
-
-    try {
-        Map<String, Integer> word_frequency = analyzer.analyzeFile(input_file);
-
-        String output_file = "task1/src/main/resources/output.csv";
-        analyzer.writeToCSV(word_frequency, output_file);
-
-        logger.info("CSV-файл создан: " + output_file);
-    } catch (IOException e) {
-        System.out.println("Error while reading file: " + input_file + ": " + e.getMessage());
-    }
-}
-```
-Это основной метод класса. Проверяем, что передан ровно один аргумент 
-(имя входного файла). Если передано несколько аргументов, то журналируем этот факт.
-Также журналируем факт создания CSV файла.
+[Здесь](https://www.w3schools.com/java/java_advanced_sorting.asp) хорошо написано про интерфейс `Comparator`.
 
 ## 2 Main.java
+
+### Метод `main(String[] args)` 
 ```java
 public class Main {
+    private static final Logger logger = LogManager.getLogger(Main.class);
+    
     public static void main(String[] args) {
-        String file = "task1/src/main/resources/input.txt";
-        
-        WordFrequencyAnalyzer.main(new String[]{file});
+        if (args.length != 1) {
+            System.out.println("Error: please specify input file name as a single argument.");
+            logger.error("Неверное количество аргументов: " + args.length);
+            return;
+        }
+
+        String input_file = args[0];
+        WordFrequencyAnalyzer analyzer = new WordFrequencyAnalyzer();
+
+        try {
+            Map<String, Integer> word_frequency = analyzer.analyzeFile(input_file);
+
+            String output_file = "task1/src/main/resources/output.csv";
+            analyzer.writeToCSV(word_frequency, output_file);
+
+            logger.info("CSV-файл создан: " + output_file);
+        } catch (IOException e) {
+            System.out.println("Error while reading file: " + input_file + ": " + e.getMessage());
+        }
     }
 }
 ```
-Просто запускаю метод `main` класса `WordFrequencyAnalyzer` с одним
-входным файлом `input.txt`. 
-Метод статичный поэтому создание объекта класса не требуется.
+Это основной метод класса. Проверяем, что передан ровно один аргумент
+(имя входного файла). Если передано несколько аргументов, то журналируем этот факт.
+Также журналируем факт создания CSV файла.
