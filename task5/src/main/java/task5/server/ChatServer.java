@@ -8,6 +8,7 @@ import java.util.Properties;
 
 public class ChatServer {
     private ServerSocket serverSocket;
+    private static int activeClients = 0;
 
     public ChatServer(int port) {
         try {
@@ -15,7 +16,7 @@ public class ChatServer {
             System.out.println("Server started on port " + port);
         } catch (IOException e) {
             System.out.println("Error starting server: " + e.getMessage());
-            System.exit(1);
+            System.exit(0);
         }
     }
 
@@ -23,13 +24,23 @@ public class ChatServer {
         try {
             while (!serverSocket.isClosed()) {
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("A new client has connected!");
+                ++activeClients;
+                System.out.println("A new client has connected! Active clients: " + activeClients);
                 ClientHandler handler = new ClientHandler(clientSocket);
                 Thread thread = new Thread(handler);
                 thread.start();
             }
         } catch (IOException e) {
             System.out.println("Error starting server: " + e.getMessage());
+        }
+    }
+
+    public static void clientDisconnected() {
+        --activeClients;
+        System.out.println("A client has disconnected. Active clients: " + activeClients);
+        if (activeClients == 0) {
+            System.out.println("No clients connected. Server shutting down...");
+            System.exit(0);
         }
     }
 

@@ -14,7 +14,8 @@ public class ChatClient {
 
     public ChatClient(int port, String userName) {
         try {
-            this.socket = new Socket("localhost", port);
+            this.socket = new Socket("localhost", port); // создаёт TCP-соединение с сервером,
+            // запущенным на этом же компьютере (localhost), и прослушивающим указанный порт.
             this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.userName = userName;

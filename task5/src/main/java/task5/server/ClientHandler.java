@@ -51,6 +51,7 @@ public class ClientHandler implements Runnable {
             System.out.println(userName + " has left the chat.");
         } finally {
             closeAll();
+            ChatServer.clientDisconnected(); // уведомил сервер о выходе клиента
         }
     }
 
