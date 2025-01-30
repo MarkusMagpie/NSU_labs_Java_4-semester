@@ -1,14 +1,22 @@
 package task5.server;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Properties;
 
 public class ChatServer {
     private ServerSocket serverSocket;
 
-    public ChatServer(ServerSocket serverSocket) {
-        this.serverSocket = serverSocket;
+    public ChatServer(int port) {
+        try {
+            this.serverSocket = new ServerSocket(port);
+            System.out.println("Server started on port " + port);
+        } catch (IOException e) {
+            System.out.println("Error starting server: " + e.getMessage());
+            System.exit(1);
+        }
     }
 
     public void start() {
@@ -25,9 +33,20 @@ public class ChatServer {
         }
     }
 
+    public static int loadPortFromConfig() {
+        Properties properties = new Properties();
+        try (FileInputStream input = new FileInputStream("task5\\src\\main\\resources\\config.properties")) {
+            properties.load(input);
+            return Integer.parseInt(properties.getProperty("server.port", "1234"));
+        } catch (IOException e) {
+            System.out.println("Error loading config, using default port 1234");
+            return 1234;
+        }
+    }
+
     public static void main (String[] args) throws IOException {
-        ServerSocket serverSocket = new ServerSocket(1234); // порт на котором сервер слушает подключения
-        ChatServer server = new ChatServer(serverSocket);
+        int port = loadPortFromConfig(); // порт на котором сервер слушает подключения
+        ChatServer server = new ChatServer(port);
         server.start();
     }
 }

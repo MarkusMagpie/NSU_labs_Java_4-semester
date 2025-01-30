@@ -18,10 +18,12 @@ public class ClientHandler implements Runnable {
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.userName = in.readLine(); // extracting username from first line
-            clients.add(this);
+            synchronized (clients) {
+                clients.add(this);
+            }
             broadcastMessage("SERVER: " + userName + " has joined the chat."); // sending message to all clients
         } catch (IOException e) {
-            closeAll(socket, in, out);
+            closeAll();
         }
     }
 
@@ -30,54 +32,57 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         String msg_from_client;
-        while (socket.isConnected()) {
-            try {
-                msg_from_client = in.readLine(); // need to be run on a separate thread
-                // so the rest of the program isn't stuck (blocking operation)
+//        while (socket.isConnected()) {
+//            try {
+//                msg_from_client = in.readLine(); // need to be run on a separate thread
+//                // so the rest of the program isn't stuck (blocking operation)
+//                broadcastMessage(msg_from_client);
+//            } catch (IOException e) {
+//                closeAll(socket, in, out);
+//                break; // client dissconects -> break out of while loop
+//            }
+//        }
+
+        try {
+            while ((msg_from_client = in.readLine()) != null) {
                 broadcastMessage(msg_from_client);
-            } catch (IOException e) {
-                closeAll(socket, in, out);
-                break; // client dissconects -> break out of while loop
             }
+        } catch (IOException e) {
+            System.out.println(userName + " has left the chat.");
+        } finally {
+            closeAll();
         }
     }
 
     // sends message to everyone in group chat
     public void broadcastMessage(String message) {
 //        System.out.println("New message: " + message);
-        for (ClientHandler client : clients) {
-            try {
-                if (!client.userName.equals(userName)) {
-                    client.out.write(message);
-                    client.out.newLine(); // run method uses readLine method -> need "\n"
-                    client.out.flush(); // buffer will not be sent until it is full
+        synchronized (clients) {
+            for (ClientHandler client : clients) {
+                try {
+                    if (!client.userName.equals(userName)) {
+                        client.out.write(message);
+                        client.out.newLine(); // run method uses readLine method -> need "\n"
+                        client.out.flush(); // buffer will not be sent until it is full
+                    }
+                } catch (IOException e) {
+                    closeAll();
                 }
-            } catch (IOException e) {
-                closeAll(socket, in, out);
             }
         }
     }
 
-    // removes client from group chat
-    public void removeClientHandler() {
-        clients.remove(this);
+    public void closeAll() {
+        synchronized (clients) {
+            clients.remove(this); // closeAll is called when we are in catch block -> user will leave
+        }
         broadcastMessage("SERVER: " + userName + " has left the chat.");
-    }
-
-    public void closeAll(Socket socket, BufferedReader in, BufferedWriter out) {
-        removeClientHandler(); // closeAll is called when we are in catch block -> user will leave
         try {
-            if (socket != null) {
-                socket.close();
-            }
-            if (in != null) {
-                in.close();
-            }
-            if (out != null) {
-                out.close();
-            }
-        } catch (IOException ignored) {
-            System.out.println("Error closing socket: " + ignored.getMessage());
+            if (socket != null) socket.close();
+            if (in != null) in.close();
+            if (out != null) out.close();
+        } catch (IOException e) {
+            System.out.println("Error closing socket: " + e.getMessage());
         }
     }
 }
