@@ -5,44 +5,55 @@ import java.net.Socket;
 import java.util.Properties;
 import java.util.Scanner;
 
-import static task5.server.ChatServer.loadPortFromConfig;
-
 public class ChatClient {
     private Socket socket;
     private BufferedWriter out;
     private BufferedReader in;
     private String userName;
+    private ClientGUI gui;
 
-    public ChatClient(String userName, int port, String serverHost) {
+    public ChatClient(String userName, int port, String serverHost, ClientGUI gui) {
         try {
             this.socket = new Socket(serverHost, port); // создаёт TCP-соединение с сервером,
             // запущенным на этом же компьютере (localhost), и прослушивающим указанный порт.
             this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.userName = userName;
+            out.write(userName); // sending username to server
+            out.newLine();
+            out.flush();
+
+            this.gui = gui;
         } catch (IOException e) {
             System.out.println("Unable to connect to server: " + e.getMessage());
             System.exit(0);
         }
     }
 
-    public void sendMessage() {
+    public void sendMessage(String msg) {
+//        try {
+//            Scanner scanner = new Scanner(System.in);
+//            while (socket.isConnected()) {
+//                String msg_to_send = scanner.nextLine();
+//                if (msg_to_send.equalsIgnoreCase("/exit")) {
+//                    closeAll();
+//                    break;
+//                }
+//                out.write(userName + ": " + msg_to_send);
+//                out.newLine();
+//                out.flush();
+//            }
+//        } catch (IOException e) {
+//            closeAll();
+//        }
         try {
-            out.write(userName);
+            if (msg.equalsIgnoreCase("/exit")) {
+                closeAll();
+                return;
+            }
+            out.write(userName + ": " + msg);
             out.newLine();
             out.flush();
-
-            Scanner scanner = new Scanner(System.in);
-            while (socket.isConnected()) {
-                String msg_to_send = scanner.nextLine();
-                if (msg_to_send.equalsIgnoreCase("/exit")) {
-                    closeAll();
-                    break;
-                }
-                out.write(userName + ": " + msg_to_send);
-                out.newLine();
-                out.flush();
-            }
         } catch (IOException e) {
             closeAll();
         }
@@ -54,6 +65,7 @@ public class ChatClient {
 
             try {
                 while ((msg_from_chat = in.readLine()) != null) {
+                    gui.appendMessage(msg_from_chat);
                     System.out.println(msg_from_chat);
                 }
             } catch (IOException e) {
@@ -101,16 +113,20 @@ public class ChatClient {
         }
     }
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter your username for the group chat: ");
-        String userName = scanner.nextLine();
-
-        int port = loadPortFromConfig();
-        String serverHost = loadHostFromConfig();
-        ChatClient client = new ChatClient(userName, port, serverHost);
-        client.listenForMessages();
-        client.sendMessage();
+    public String getUserName() {
+        return userName;
     }
+
+//    public static void main(String[] args) {
+//        Scanner scanner = new Scanner(System.in);
+//        System.out.println("Enter your username for the group chat: ");
+//        String userName = scanner.nextLine();
+//
+//        int port = loadPortFromConfig();
+//        String serverHost = loadHostFromConfig();
+//        ChatClient client = new ChatClient(userName, port, serverHost);
+//        client.listenForMessages();
+//        client.sendMessage();
+//    }
 }
 
