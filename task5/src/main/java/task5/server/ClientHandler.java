@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
+import static task5.server.ChatServer.log;
+
 public class ClientHandler implements Runnable {
     public static ArrayList<ClientHandler> clients = new ArrayList<>();
     private Socket socket; // to establish connection between server and client
@@ -18,9 +20,7 @@ public class ClientHandler implements Runnable {
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.userName = in.readLine(); // extracting username from first line
-            synchronized (clients) {
-                clients.add(this);
-            }
+            clients.add(this);
             broadcastMessage("SERVER: " + userName + " has joined the chat."); // sending message to all clients
         } catch (IOException e) {
             closeAll();
@@ -45,10 +45,11 @@ public class ClientHandler implements Runnable {
 
         try {
             while ((msg_from_client = in.readLine()) != null) {
+                log(msg_from_client);
                 broadcastMessage(msg_from_client);
             }
         } catch (IOException e) {
-            System.out.println(userName + " has left the chat.");
+            System.out.println("Error receiving messages from client: " + e.getMessage());
         } finally {
             closeAll();
             ChatServer.clientDisconnected(); // уведомил сервер о выходе клиента
@@ -57,33 +58,28 @@ public class ClientHandler implements Runnable {
 
     // sends message to everyone in group chat
     public void broadcastMessage(String message) {
-//        System.out.println("New message: " + message);
-        synchronized (clients) {
-            for (ClientHandler client : clients) {
-                try {
-                    if (!client.userName.equals(userName)) {
-                        client.out.write(message);
-                        client.out.newLine(); // run method uses readLine method -> need "\n"
-                        client.out.flush(); // buffer will not be sent until it is full
-                    }
-                } catch (IOException e) {
-                    closeAll();
+        for (ClientHandler client : clients) {
+            try {
+                if (!client.userName.equals(userName)) {
+                    client.out.write(message);
+                    client.out.newLine(); // run method uses readLine method -> need "\n"
+                    client.out.flush(); // buffer will not be sent until it is full
                 }
+            } catch (IOException e) {
+                closeAll();
             }
         }
     }
 
     public void closeAll() {
-        synchronized (clients) {
-            clients.remove(this); // closeAll is called when we are in catch block -> user will leave
-        }
+        clients.remove(this); // closeAll is called when we are in catch block -> user will leave
         broadcastMessage("SERVER: " + userName + " has left the chat.");
         try {
             if (socket != null) socket.close();
             if (in != null) in.close();
             if (out != null) out.close();
         } catch (IOException e) {
-            System.out.println("Error closing socket: " + e.getMessage());
+            log("Error closing socket: " + e.getMessage());
         }
     }
 }

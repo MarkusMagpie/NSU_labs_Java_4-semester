@@ -1,5 +1,8 @@
 package task5.server;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -7,15 +10,19 @@ import java.net.Socket;
 import java.util.Properties;
 
 public class ChatServer {
+    private static final Logger logger = LogManager.getLogger(ChatServer.class.getName());
+    private static boolean loggingEnabled;
+
     private ServerSocket serverSocket;
     private static int activeClients = 0;
 
-    public ChatServer(int port) {
+    public ChatServer(int port, boolean loggingEnabled) {
+        this.loggingEnabled = loggingEnabled;
         try {
             this.serverSocket = new ServerSocket(port);
-            System.out.println("Server started on port " + port);
+            log("Server started on port: " + port);
         } catch (IOException e) {
-            System.out.println("Error starting server: " + e.getMessage());
+            log("Error starting server: " + e.getMessage());
             System.exit(0);
         }
     }
@@ -25,21 +32,21 @@ public class ChatServer {
             while (!serverSocket.isClosed()) {
                 Socket clientSocket = serverSocket.accept();
                 ++activeClients;
-                System.out.println("A new client has connected! Active clients: " + activeClients);
+                log("A new client has connected! Active clients: " + activeClients);
                 ClientHandler handler = new ClientHandler(clientSocket);
                 Thread thread = new Thread(handler);
                 thread.start();
             }
         } catch (IOException e) {
-            System.out.println("Error starting server: " + e.getMessage());
+            log("Error starting server: " + e.getMessage());
         }
     }
 
     public static void clientDisconnected() {
         --activeClients;
-        System.out.println("A client has disconnected. Active clients: " + activeClients);
+        log("A client has disconnected. Active clients: " + activeClients);
         if (activeClients == 0) {
-            System.out.println("No clients connected. Server shutting down...");
+            log("No clients connected. Server shutting down...");
             System.exit(0);
         }
     }
@@ -50,14 +57,34 @@ public class ChatServer {
             properties.load(input);
             return Integer.parseInt(properties.getProperty("server.port", "1234"));
         } catch (IOException e) {
-            System.out.println("Error loading config, using default port 1234");
+//            System.out.println("Error loading config, using default port 1234");
+            log("Error loading config, using default port 1234");
             return 1234;
         }
     }
 
+    public static boolean loadLoggingFromConfig() {
+        Properties properties = new Properties();
+        try (FileInputStream input = new FileInputStream("task5/src/main/resources/config.properties")) {
+            properties.load(input);
+            return Boolean.parseBoolean(properties.getProperty("server.log", "false"));
+        } catch (IOException e) {
+            log("Error loading logging config, using default (false)");
+            return false;
+        }
+    }
+
+    public static void log(String message) {
+        if (loggingEnabled) {
+            logger.info(message);
+        }
+        System.out.println(message);
+    }
+
     public static void main (String[] args) throws IOException {
         int port = loadPortFromConfig(); // порт на котором сервер слушает подключения
-        ChatServer server = new ChatServer(port);
+        boolean logEnabled = loadLoggingFromConfig();
+        ChatServer server = new ChatServer(port, logEnabled);
         server.start();
     }
 }

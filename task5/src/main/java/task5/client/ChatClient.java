@@ -2,6 +2,7 @@ package task5.client;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.Properties;
 import java.util.Scanner;
 
 import static task5.server.ChatServer.loadPortFromConfig;
@@ -12,9 +13,9 @@ public class ChatClient {
     private BufferedReader in;
     private String userName;
 
-    public ChatClient(int port, String userName) {
+    public ChatClient(String userName, int port, String serverHost) {
         try {
-            this.socket = new Socket("localhost", port); // создаёт TCP-соединение с сервером,
+            this.socket = new Socket(serverHost, port); // создаёт TCP-соединение с сервером,
             // запущенным на этом же компьютере (localhost), и прослушивающим указанный порт.
             this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -61,6 +62,22 @@ public class ChatClient {
                 closeAll();
             }
         }).start();
+
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                String msg_from_chat;
+//
+//                while (socket.isConnected()) {
+//                    try {
+//                        msg_from_chat = in.readLine();
+//                        System.out.println(msg_from_chat);
+//                    } catch (IOException e) {
+//                        closeAll();
+//                    }
+//                }
+//            }
+//        }).start();
     }
 
     public void closeAll() {
@@ -68,8 +85,19 @@ public class ChatClient {
             if (socket != null) socket.close();
             if (out != null) out.close();
             if (in != null) in.close();
-        } catch (IOException ignored) {
-            System.out.println("Error closing socket: " + ignored.getMessage());
+        } catch (IOException e) {
+            System.out.println("Error closing socket: " + e.getMessage());
+        }
+    }
+
+    public static String loadHostFromConfig() {
+        Properties properties = new Properties();
+        try (FileInputStream input = new FileInputStream("task5/src/main/resources/config.properties")) {
+            properties.load(input);
+            return properties.getProperty("server.host", "localhost");
+        } catch (IOException e) {
+            System.out.println("Error loading config, using default host: localhost");
+            return "localhost";
         }
     }
 
@@ -79,7 +107,8 @@ public class ChatClient {
         String userName = scanner.nextLine();
 
         int port = loadPortFromConfig();
-        ChatClient client = new ChatClient(port, userName);
+        String serverHost = loadHostFromConfig();
+        ChatClient client = new ChatClient(userName, port, serverHost);
         client.listenForMessages();
         client.sendMessage();
     }
