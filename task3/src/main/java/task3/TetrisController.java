@@ -28,6 +28,11 @@ public class TetrisController implements KeyListener {
 
         player_name = JOptionPane.showInputDialog(null, "Enter your username: ", "New Game", JOptionPane.QUESTION_MESSAGE);
 
+        if (player_name == null || player_name.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Game Over", "Exit", JOptionPane.INFORMATION_MESSAGE);
+            System.exit(0); // Завершаем программу
+        }
+
         // if game is not paused, start game timer
         game_timer = new Timer(1000, e -> {
             if (!model.GetPause()) {
@@ -69,6 +74,10 @@ public class TetrisController implements KeyListener {
 
             case KeyEvent.VK_UP, KeyEvent.VK_W:
                 model.RotatePiece();
+                break;
+
+            case KeyEvent.VK_SHIFT:
+                model.ShiftPieceDown();
                 break;
         }
         view.repaint();

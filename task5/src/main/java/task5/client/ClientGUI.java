@@ -62,7 +62,6 @@ public class ClientGUI {
         client.listenForMessages();
     }
 
-    // Метод отправки сообщений
     public void sendMessage() {
         String message = messageField.getText().trim();
         if (!message.isEmpty()) {

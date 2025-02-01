@@ -11,7 +11,7 @@ public class TimerPanel extends JPanel {
     private int elapsed_time; // in-game time in secs
 
     public TimerPanel() {
-        timer_label = new JLabel("Time: 0");
+        timer_label = new JLabel("Time: 0s");
         setLayout(new BorderLayout());
 
         add(timer_label, BorderLayout.CENTER);
@@ -24,7 +24,7 @@ public class TimerPanel extends JPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
                 elapsed_time++;
-                timer_label.setText("Time: " + elapsed_time);
+                timer_label.setText("Time: " + elapsed_time + "s");
             }
         });
     }
@@ -39,7 +39,7 @@ public class TimerPanel extends JPanel {
 
     public void ResetTimer() {
         elapsed_time = 0;
-        timer_label.setText("Time: 0");
+        timer_label.setText("Time: 0s");
     }
 
     public int GetElapsedTime() {

@@ -85,6 +85,14 @@ public class TetrisModel {
         }
     }
 
+    public void ShiftPieceDown() {
+        if (paused) return;
+
+        while (CanMove(current_piece, 0, 1)) {
+            MovePieceDown();
+        }
+    }
+
     public void MovePieceLeft() {
         if (paused) return;
 
@@ -108,14 +116,33 @@ public class TetrisModel {
     public void RotatePiece() {
         if (paused) return;
 
+        // оригинальные координаты сохраняю
+        Point[] original_coords = current_piece.getCoordinates().clone();
+
         current_piece.rotate();
         // check if we can't rotate, return to original position
         if (!CanMove(current_piece, 0, 0)) {
-            System.out.println("Cannot rotate object:" + current_piece);
-//            JOptionPane.showMessageDialog(null, "Cannot rotate object", "Error", JOptionPane.ERROR_MESSAGE);
-            current_piece.rotate();
-            current_piece.rotate();
-            current_piece.rotate();
+            // сдвиги для WallKick
+            int[][] wallKick_offsets = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}};
+
+            boolean rotated = false;
+            for (int[] offset : wallKick_offsets) {
+                if (CanMove(current_piece, offset[0], offset[1])) {
+                    for (Point p : current_piece.getCoordinates()) {
+                        p.x += offset[0];
+                        p.y += offset[1];
+                    }
+                    rotated = true;
+                    break;
+                }
+            }
+
+            if (!rotated) {
+                System.out.println("Cannot rotate object:" + current_piece);
+                current_piece.rotate();
+                current_piece.rotate();
+                current_piece.rotate();
+            }
         }
     }
 

@@ -48,12 +48,12 @@ public class TetrisView extends JPanel {
     private void DrawCurrentPiece(Graphics g, TetroMino piece) {
         g.setColor(piece.getColor());
         for (Point p : piece.getCoordinates()) {
-            g.fillRect(p.x * cell_size, p.y * cell_size, cell_size, cell_size);
+//            g.fillRect(p.x * cell_size, p.y * cell_size, cell_size, cell_size);
+            // если надо чтобы вся фигура а не одна клетка была одного цвета, то раскоментируй что ниже
+            g.setColor(piece.getColor());
+            g.fillRect(p.x * cell_size + 1, p.y * cell_size + 1, cell_size - 2, cell_size - 2);
             g.setColor(Color.BLACK);
             g.drawRect(p.x * cell_size, p.y * cell_size, cell_size, cell_size);
-            // если надо чтобы вся фигура а не одна клетка была одного цвета, то раскоментируй что ниже
-//            g.setColor(piece.getColor());
-//            g.fillRect(p.x * cell_size, p.y * cell_size, cell_size, cell_size);
         }
     }
 
