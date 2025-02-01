@@ -17,7 +17,7 @@ public class TetroMino {
     public void rotate() {
         Point center = coordinates[1];
         for (Point coordinate : coordinates) {
-            // 2d matrix 90 degree clockwise rotation matrix
+            // 2d matrix 90 degree counterclockwise rotation matrix
             // | 0 -1| => x = -y
             // | 1  0| => y = x
             int x = coordinate.x - center.x; // offset from center

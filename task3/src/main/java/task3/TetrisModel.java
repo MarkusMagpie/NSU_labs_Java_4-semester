@@ -20,7 +20,6 @@ public class TetrisModel {
         this.width = width;
         this.height = height;
         SpawnPiece();
-//        score = 0;
         paused = false;
     }
 
@@ -35,7 +34,7 @@ public class TetrisModel {
         SpawnPiece();
     }
 
-    private void SpawnPiece() {
+    public void SpawnPiece() {
         // create a single T-tetromino (randomly)
 //        Point[] coords = { new Point(0, 0), new Point(1, 0), new Point(2, 0), new Point(3, 0) };
 //        current_piece = new TetroMino(coords, Color.RED);
@@ -116,9 +115,6 @@ public class TetrisModel {
     public void RotatePiece() {
         if (paused) return;
 
-        // оригинальные координаты сохраняю
-        Point[] original_coords = current_piece.getCoordinates().clone();
-
         current_piece.rotate();
         // check if we can't rotate, return to original position
         if (!CanMove(current_piece, 0, 0)) {
@@ -146,7 +142,7 @@ public class TetrisModel {
         }
     }
 
-    private void PlacePiece() {
+    public void PlacePiece() {
         for (Point p : current_piece.getCoordinates()) {
             if (p.x >= 0 && p.x < width && p.y >= 0 && p.y < height) {
                 board[p.x][p.y] = true;
@@ -157,7 +153,7 @@ public class TetrisModel {
 
     // check from bottom to top if any row is full
     //    if it is, then add 100 score
-    private void ClearRows() {
+    public void ClearRows() {
         for (int y = height - 1; y >= 0; --y) {
             boolean full_row = true;
             for (int x = 0; x < width; ++x) {
@@ -182,7 +178,7 @@ public class TetrisModel {
         }
     }
 
-    private boolean CanMove(TetroMino piece, int x, int y) {
+    public boolean CanMove(TetroMino piece, int x, int y) {
         for (Point p : piece.getCoordinates()) {
             int new_x = p.x + x;
             int new_y = p.y + y;
@@ -203,6 +199,10 @@ public class TetrisModel {
 
     public TetroMino GetCurrentPiece() {
         return current_piece;
+    }
+
+    public TetroMino SetCurrentPiece(TetroMino piece) {
+        return current_piece = piece;
     }
 
     public boolean[][] GetBoard() {
