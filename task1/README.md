@@ -6,7 +6,7 @@
 ```java
 private static final Logger logger = LogManager.getLogger(Main.class);
 
-private final HashMap<String, Integer> word_frequency = new HashMap<>();
+private final Map<String, Integer> word_frequency = new HashMap<>();
 private int word_count;
 ```
  - `Logger logger` - используется для записи информации и ошибок в процессе работы программы.
@@ -17,32 +17,31 @@ private int word_count;
 ### 1.2 Метод `analyzeFile`
 ```java
 public Map<String, Integer> analyzeFile(String filename) throws IOException {
-    try (Reader reader = new InputStreamReader(new FileInputStream(filename))) {
-        StringBuilder sb = new StringBuilder();
-        int current_char;
+    Reader reader = new InputStreamReader(new FileInputStream(filename));
+    StringBuilder sb = new StringBuilder();
+    int current_char;
 
-        while ((current_char = reader.read()) != -1) {
-            char c = (char) current_char;
+    while ((current_char = reader.read()) != -1) {
+        char c = (char) current_char;
 
-            if (Character.isLetterOrDigit(c)) {
-                sb.append(Character.toLowerCase(c));
-            } else if (!sb.isEmpty()) {
-                String word = sb.toString().toLowerCase();
-                word_frequency.put(word, word_frequency.getOrDefault(word, 0) + 1);
-                word_count++;
-                sb.setLength(0);
-
-                logger.info("Слово: " + word + ", частота: " + word_frequency.get(word));
-            }
-        }
-
-        if (!sb.isEmpty()) {
+        if (Character.isLetterOrDigit(c)) {
+            sb.append(Character.toLowerCase(c));
+        } else if (!sb.isEmpty()) {
             String word = sb.toString().toLowerCase();
             word_frequency.put(word, word_frequency.getOrDefault(word, 0) + 1);
             word_count++;
+            sb.setLength(0);
 
             logger.info("Слово: " + word + ", частота: " + word_frequency.get(word));
         }
+    }
+
+    if (!sb.isEmpty()) {
+        String word = sb.toString().toLowerCase();
+        word_frequency.put(word, word_frequency.getOrDefault(word, 0) + 1);
+        word_count++;
+
+        logger.info("Слово: " + word + ", частота: " + word_frequency.get(word));
     }
 
     logger.info("Всего слов: " + word_count);
@@ -50,12 +49,18 @@ public Map<String, Integer> analyzeFile(String filename) throws IOException {
 }
 ```
 Этот метод анализирует входящий текстовый файл и подсчитывает частоты слов в нем.  
-Очевидно что слова читаем посимвольно. Символы составляют слова, 
+Очевидно что слова читаем посимвольно методом [read()](https://docs.oracle.com/javase/8/docs/api/java/io/Reader.html#read--). 
+Символы составляют слова, 
 которые добавляются методом [append(char c)](https://docs.oracle.com/javase/8/docs/api/java/lang/StringBuilder.html#append-char-) 
 в объект `StringBuilder sb`. Учитываем что по условию символ это
 цифра или буква (проверяется методом [Character.isLetterOrDigit(char ch)](https://www.javatpoint.com/java-character-isletterordigit-method)), 
 значит если встретили не такой символ то мы дошли до
-сепаратора а значит надо добавлять слово в карту и обнулять `sb`.  
+сепаратора а значит надо добавлять слово в `word_frequency` и обнулять `sb`.  
+
+> На всякий пожарный оговори что при инициализации объекта reader мы
+> используем FileInputStream, который есть подкласс класса [InputStream](https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html),
+> а класс [InputStreamReader](https://docs.oracle.com/javase/8/docs/api/java/io/InputStreamReader.html) 
+> есть подкласс класса Reader.
 
 Ну и по завершению посимвольного прохода входного файла логгер
 выводит информацию об общем количестве слов и возвращаем построенную 

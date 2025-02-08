@@ -29,6 +29,7 @@ public class Main {
             logger.info("CSV-файл создан: " + output_file);
         } catch (IOException e) {
             System.out.println("Error while reading file: " + input_file + ": " + e.getMessage());
+            logger.error("Ошибка при чтении файла: " + e.getMessage());
         }
     }
 }
