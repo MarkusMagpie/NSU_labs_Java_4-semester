@@ -44,12 +44,15 @@ public abstract class Command {
 `public abstract void Execute(ExecutionContext context, String[] args) throws Exception;`  
 принимает текущий контекст исполнения и аргументы для комманды (1 или 2).
   
+> If a class includes abstract methods, then the class itself must be declared abstract  
+> Покажи [это](https://docs.oracle.com/javase/tutorial/java/IandI/abstract.html).
+
 ## 1.3 Класс `CommandFactory`
 ```java
 class CommandFactory {
     private static final Map<String, String> command_map = new HashMap<>();
 
-    static {
+    CommandFactory() {
         try (InputStream input = CommandFactory.class.getResourceAsStream("/commands.properties")) {
             Properties properties = new Properties();
             properties.load(input);
@@ -74,7 +77,7 @@ class CommandFactory {
 Данный класс создает объекты команд на основе их имени, 
 предварительно загружая файл конфигурации `command.properties`
   
-### Рассмотрим сначала статический блок вне методов:  
+### Рассмотрим сначала конструктор класса:  
 1.```InputStream input = CommandFactory.class.getResourceAsStream("/commands.properties")```  
 
 `CommandFactory.class` возвращает объект `Class`, представляющий класс `CommandFactory`. 
@@ -85,7 +88,7 @@ class CommandFactory {
 
 > [!NOTE]  
 > Путь, начинающийся с /, указывает, что файл ищется от корня
-2. Загрузка пар в объект типа Properties:
+2. Загрузка пар в объект типа `Properties`:
 ```java
 Properties properties = new Properties();
 properties.load(input);
@@ -94,7 +97,7 @@ properties.load(input);
 и затем загружаем все пары (key-value) из файла `/commands.properties` с помощью метода
 [load](https://docs.oracle.com/javase/8/docs/api/java/util/Properties.html#load-java.io.InputStream-).
 
-3. Запонение `command_map` парами
+3. Заполнение `command_map` парами:
 ```java
 for (String name : properties.stringPropertyNames()) {
     command_map.put(name, properties.getProperty(name));
@@ -173,6 +176,7 @@ public class Main {
 
                 logger.log(Level.INFO, "Команда получена: " + command_name + " " + Arrays.toString(command_args));
                 try {
+                    new CommandFactory();
                     Command command = CommandFactory.CreateCommand(command_name);
                     command.Execute(context, command_args);
                     logger.log(Level.INFO, "Команда выполнена: " + command_name + " " + Arrays.toString(command_args));

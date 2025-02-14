@@ -28,6 +28,8 @@ public class Main {
 
                 logger.log(Level.INFO, "Command received: " + command_name + " " + Arrays.toString(command_args));
                 try {
+//                    Command command = CommandFactory.CreateCommand(command_name);
+                    new CommandFactory();
                     Command command = CommandFactory.CreateCommand(command_name);
                     command.Execute(context, command_args);
                     logger.log(Level.INFO, "Command executed: " + command_name + " " + Arrays.toString(command_args));

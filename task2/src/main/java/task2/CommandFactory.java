@@ -11,8 +11,7 @@ class CommandFactory {
     //  сопоставляет имя команды с полным именем класса, реализующего эту команду
     //  PUSH -> task2.commands.PushCommand
 
-    static {
-        // загрузка соответствий команд и классов из файла конфигурации
+    CommandFactory() {
         try (InputStream input = CommandFactory.class.getResourceAsStream("/commands.properties")) {
             Properties properties = new Properties();
             properties.load(input);
@@ -23,7 +22,6 @@ class CommandFactory {
             throw new RuntimeException("Ошибка при загрузке конфигурационного файла", e);
         }
     }
-    // статический блок - для инициализации статического поля command_map из конфигурационного файла
 
     public static Command CreateCommand(String name) throws Exception {
         String class_name = command_map.get(name);
