@@ -26,7 +26,7 @@ public class ExecutionContext {
 это ассоциативный массив для хранения переменных и их значений. 
 Значения из массива будут перемещаться в стек.
 
-## 1.2 Абстрактный интерфейс `Command`
+## 1.2 Абстрактный класс `Command`
 ```java
 public abstract class Command {
     public abstract void Execute(ExecutionContext context, String[] args) throws Exception;
@@ -42,7 +42,7 @@ public abstract class Command {
 
 Абстрактный метод  
 `public abstract void Execute(ExecutionContext context, String[] args) throws Exception;`  
-принимает текущий контекст исполнения и аргументы для комманды (1 или 2).
+принимает текущий контекст исполнения и аргументы для комманды (0,1 или 2).
   
 > If a class includes abstract methods, then the class itself must be declared abstract  
 > Покажи [это](https://docs.oracle.com/javase/tutorial/java/IandI/abstract.html).

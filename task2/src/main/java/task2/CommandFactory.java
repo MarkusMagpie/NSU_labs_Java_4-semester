@@ -11,7 +11,7 @@ class CommandFactory {
     //  сопоставляет имя команды с полным именем класса, реализующего эту команду
     //  PUSH -> task2.commands.PushCommand
 
-    CommandFactory() {
+    static {
         try (InputStream input = CommandFactory.class.getResourceAsStream("/commands.properties")) {
             Properties properties = new Properties();
             properties.load(input);
