@@ -16,7 +16,7 @@ public class SubCommand implements Command {
         if (Double.isInfinite(res) || Double.isNaN(res) || res >= Double.MAX_VALUE || res <= Double.MIN_VALUE) {
             context.GetStack().push(a);
             context.GetStack().push(b);
-            throw new ArithmeticException("Переполнение SUB: значение переменной выходит за допустимый диапазон чисел double");
+            throw new ArithmeticException("Переполнение Sub: значение переменной выходит за допустимый диапазон чисел double");
         }
 
 

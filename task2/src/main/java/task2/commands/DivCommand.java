@@ -23,7 +23,7 @@ public class DivCommand implements Command {
         if (Double.isInfinite(res) || Double.isNaN(res)) {
             context.GetStack().push(a);
             context.GetStack().push(b);
-            throw new ArithmeticException("Переполнение: значение переменной выходит за допустимый диапазон чисел double");
+            throw new ArithmeticException("Переполнение Div: значение переменной выходит за допустимый диапазон чисел double");
         }
 
         context.GetStack().push(a / b);
