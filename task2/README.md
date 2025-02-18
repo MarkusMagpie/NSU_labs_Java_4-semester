@@ -26,33 +26,29 @@ public class ExecutionContext {
 это ассоциативный массив для хранения переменных и их значений. 
 Значения из массива будут перемещаться в стек.
 
-## 1.2 Абстрактный класс `Command`
+## 1.2 Интерфейс `Command`
 ```java
-public abstract class Command {
-    public abstract void Execute(ExecutionContext context, String[] args) throws Exception;
+public interface Command {
+    void Execute(ExecutionContext context, String[] args) throws Exception;
 }
 ```
-Это абстрактный класс, использующийся как основа для других (дочерних) классов.
-Так как класс абстрактный, о чем свидетельствует
-ключевое слово `abstract` у класса и его метода, то объект класса
-`Command` не может быть создан напрямую.
+Это функциональный интерфейс, использующийся как основа для классов, 
+его имплементирующих.
 
-Класс обеспечивает единообразие реализации команд (дочерних классов), 
-также проще расширять функционал отдельных команд по необходимости.
+Интерфейс обеспечивает единообразие реализации команд (имплементирующих 
+классов), 
+также проще расширяет функционал отдельных команд по необходимости.
 
-Абстрактный метод  
+Метод  
 `public abstract void Execute(ExecutionContext context, String[] args) throws Exception;`  
 принимает текущий контекст исполнения и аргументы для комманды (0,1 или 2).
-  
-> If a class includes abstract methods, then the class itself must be declared abstract  
-> Покажи [это](https://docs.oracle.com/javase/tutorial/java/IandI/abstract.html).
 
 ## 1.3 Класс `CommandFactory`
 ```java
 class CommandFactory {
     private static final Map<String, String> command_map = new HashMap<>();
 
-    CommandFactory() {
+    static {
         try (InputStream input = CommandFactory.class.getResourceAsStream("/commands.properties")) {
             Properties properties = new Properties();
             properties.load(input);
@@ -77,7 +73,7 @@ class CommandFactory {
 Данный класс создает объекты команд на основе их имени, 
 предварительно загружая файл конфигурации `command.properties`
   
-### Рассмотрим сначала конструктор класса:  
+### Рассмотрим сначала статичный блок:  
 1.```InputStream input = CommandFactory.class.getResourceAsStream("/commands.properties")```  
 
 `CommandFactory.class` возвращает объект `Class`, представляющий класс `CommandFactory`. 
