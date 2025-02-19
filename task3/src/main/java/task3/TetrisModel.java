@@ -4,55 +4,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Random;
 
-enum TetrominoType {
-    I {
-        @Override
-        public TetroMino create() {
-            return TetroMino.createI();
-        }
-    },
-    O {
-        @Override
-        public TetroMino create() {
-            return TetroMino.createO();
-        }
-    },
-    T {
-        @Override
-        public TetroMino create() {
-            return TetroMino.createT();
-        }
-    },
-    S {
-        @Override
-        public TetroMino create() {
-            return TetroMino.createS();
-        }
-    },
-    Z {
-        @Override
-        public TetroMino create() {
-            return TetroMino.createZ();
-        }
-    },
-    J {
-        @Override
-        public TetroMino create() {
-            return TetroMino.createJ();
-        }
-    },
-    L {
-        @Override
-        public TetroMino create() {
-            return TetroMino.createL();
-        }
-    };
-
-    // перегружаемый метод для создания фигур
-    public abstract TetroMino create();
-}
-
-
 public class TetrisModel {
     private int width;
     private int height;
@@ -83,9 +34,7 @@ public class TetrisModel {
 
     public void SpawnPiece() {
         Random random = new Random();
-        int shape = random.nextInt(7);
-        TetrominoType new_piece = TetrominoType.values()[shape];
-        current_piece = new_piece.create();
+        current_piece = TetroMino.getRandomTetroMino(random);
     }
 
     public void MovePieceDown() {

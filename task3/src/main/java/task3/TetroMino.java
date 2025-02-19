@@ -1,14 +1,12 @@
 package task3;
 
 import java.awt.*;
-
-// coordinates - array of Points that define the figure's position
+import java.util.Random;
 
 public class TetroMino {
     private final Point[] coordinates;
     private final Color color;
 
-    // constructor
     public TetroMino(Point[] coordinates, Color color) {
         this.coordinates = coordinates;
         this.color = color;
@@ -27,48 +25,39 @@ public class TetroMino {
         }
     }
 
-    // methods to create all kinds of tetrominos (7)
-    public static TetroMino createI() {
-        return new TetroMino(new Point[]{
+    public static TetroMino getRandomTetroMino(Random random) {
+        int rand = random.nextInt(7);
+        return switch (rand) {
+            case 0 -> new TetroMino(new Point[]{
                 new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(3, 1)
-        }, Color.CYAN);
-    }
-
-    public static TetroMino createO() {
-        return new TetroMino(new Point[]{
+            }, Color.CYAN); // createI
+            case 1 -> new TetroMino(new Point[]{
                 new Point(1, 0), new Point(2, 0), new Point(1, 1), new Point(2, 1)
-        }, Color.YELLOW);
-    }
-
-    public static TetroMino createT() {
-        return new TetroMino(new Point[]{
+            }, Color.YELLOW); // createO
+            case 2 -> new TetroMino(new Point[]{
                 new Point(1, 0), new Point(0, 1), new Point(1, 1), new Point(2, 1)
-        }, Color.MAGENTA);
-    }
-
-    public static TetroMino createS() {
-        return new TetroMino(new Point[]{
+            }, Color.MAGENTA); // createT
+            case 3 -> new TetroMino(new Point[]{
                 new Point(1, 0), new Point(2, 0), new Point(0, 1), new Point(1, 1)
-        }, Color.GREEN);
-    }
-
-    public static TetroMino createZ() {
-        return new TetroMino(new Point[]{
+            }, Color.GREEN); // createS
+            case 4 -> new TetroMino(new Point[]{
                 new Point(0, 0), new Point(1, 0), new Point(1, 1), new Point(2, 1)
-        }, Color.RED);
-    }
-
-    public static TetroMino createJ() {
-        return new TetroMino(new Point[]{
+            }, Color.RED); // createZ
+            case 5 -> new TetroMino(new Point[]{
                 new Point(0, 0), new Point(0, 1), new Point(1, 1), new Point(2, 1)
-        }, Color.BLUE);
+            }, Color.BLUE); // createJ
+            case 6 -> new TetroMino(new Point[]{
+                new Point(2, 0), new Point(0, 1), new Point(1, 1), new Point(2, 1)
+            }, Color.ORANGE); // createL
+            default -> throw new IllegalArgumentException("Unexpected value: " + rand);
+        };
     }
 
-    public static TetroMino createL() {
-        return new TetroMino(new Point[]{
-                new Point(2, 0), new Point(0, 1), new Point(1, 1), new Point(2, 1)
-        }, Color.ORANGE);
-    }
+//    public static TetroMino createI() {
+//        return new TetroMino(new Point[]{
+//                new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(3, 1)
+//        }, Color.CYAN);
+//    }
 
     public Point[] getCoordinates() {
         return coordinates;
