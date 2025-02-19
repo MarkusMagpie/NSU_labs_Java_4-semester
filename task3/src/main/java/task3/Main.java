@@ -8,12 +8,13 @@ import java.awt.*;
 
 public class Main {
     public static void main(String[] args) {
-        TetrisModel model = new TetrisModel(10, 20); // Model
-        TetrisView view = new TetrisView(model); // View
+        TetrisModel model = new TetrisModel(10, 20);
+        TetrisView view = new TetrisView(model);
         HighScores hs = new HighScores();
         TimerPanel timer_panel = new TimerPanel();
         ScorePanel score_panel = new ScorePanel(model);
-        TetrisController controller = new TetrisController(model, view, hs, timer_panel); // Controller
+        TetrisController controller = new TetrisController(model, view, hs, timer_panel, score_panel);
+        model.setController(controller);
 
         JFrame frame = new JFrame("Tetris");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -31,18 +32,5 @@ public class Main {
         frame.setJMenuBar(menu_bar);
 
         frame.setVisible(true);
-
-        while (!model.IsGameOver()) {
-            try {
-                Thread.sleep(500);
-                model.MovePieceDown();
-                view.repaint();
-                score_panel.UpdateScore();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        System.out.println("GAME OVER!");
     }
 }

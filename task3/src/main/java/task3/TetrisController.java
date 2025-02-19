@@ -4,42 +4,41 @@ import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-// TetrisController class
-// processes user input and updates game state
-// here we override keyPressed method so that we can use it to process
-//     user input
-
 public class TetrisController implements KeyListener {
     private TetrisModel model;
     private TetrisView view;
+
     private HighScores hs;
-
-    private TimerPanel timer_panel;
-    private Timer game_timer;
-
+    private TimerPanel timer_panel; // таймер для счета времен игры
+    private Timer game_timer; // таймер для игры
+    private ScorePanel score_panel;
     private String player_name;
 
-    public TetrisController(TetrisModel model, TetrisView view, HighScores hs, TimerPanel timer_panel) {
+    public TetrisController(TetrisModel model, TetrisView view, HighScores hs, TimerPanel timer_panel, ScorePanel sp) {
         this.model = model;
         this.view = view;
-        this.hs = new HighScores();
-        this.timer_panel = timer_panel;
+        this.hs = hs;
+        this.timer_panel = timer_panel; // таймер секундный
+        this.score_panel = sp;
+
         timer_panel.StartTimer();
 
         player_name = JOptionPane.showInputDialog(null, "Enter your username: ", "New Game", JOptionPane.QUESTION_MESSAGE);
 
         if (player_name == null || player_name.trim().isEmpty()) {
             JOptionPane.showMessageDialog(null, "Game Over", "Exit", JOptionPane.INFORMATION_MESSAGE);
-            System.exit(0); // Завершаем программу
+            System.exit(0);
         }
 
-        // if game is not paused, start game timer
-        game_timer = new Timer(1000, e -> {
+        game_timer = new Timer(500, e -> {
             if (!model.GetPause()) {
                 model.MovePieceDown();
                 view.repaint();
+                score_panel.UpdateScore();
             }
         });
+
+        game_timer.start();
     }
 
     @Override
@@ -94,12 +93,14 @@ public class TetrisController implements KeyListener {
         System.out.println("Game paused");
         model.SetPause(true);
         timer_panel.StopTimer();
+        game_timer.stop();
     }
 
     public void ResumeGame() {
         System.out.println("Game resumed");
         model.SetPause(false);
         timer_panel.StartTimer();
+        game_timer.start();
     }
 
     public void StartNewGame() {
@@ -116,7 +117,7 @@ public class TetrisController implements KeyListener {
             model.Reset();
             view.repaint();
             timer_panel.ResetTimer();
-            timer_panel.StartTimer();
+            ResumeGame();
         } else {
             ResumeGame();
         }
@@ -137,15 +138,18 @@ public class TetrisController implements KeyListener {
         ResumeGame();
     }
 
+    public void GameOver() {
+        JOptionPane.showMessageDialog(null, "Game Over", "Exit", JOptionPane.INFORMATION_MESSAGE);
+        hs.AddScore(player_name, model.GetScore(), timer_panel.GetElapsedTime());
+        System.out.println("Added new score: " + player_name + " - " + model.GetScore() + " - " + timer_panel.GetElapsedTime() + "s");
+        System.out.println("You have exited the game");
+        System.exit(0);
+    }
+
     public void ExitVerification() {
         PauseGame();
         int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to exit?", "Exit Confirmation", JOptionPane.YES_NO_OPTION);
-        if (result == JOptionPane.YES_OPTION) {
-            hs.AddScore(player_name, model.GetScore(), timer_panel.GetElapsedTime());
-            System.out.println("Added new score: " + player_name + " - " + model.GetScore() + " - " + timer_panel.GetElapsedTime() + "s");
-            System.out.println("You have exited the game");
-            System.exit(0);
-        }
+        if (result == JOptionPane.YES_OPTION) { GameOver(); }
         ResumeGame();
     }
 }

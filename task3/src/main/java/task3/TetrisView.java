@@ -35,12 +35,9 @@ public class TetrisView extends JPanel {
                 if (board[x][y]) {
                     g.setColor(Color.GRAY);
                     g.fillRect(x * cell_size, y * cell_size, cell_size, cell_size);
-                    g.setColor(Color.BLACK);
-                    g.drawRect(x * cell_size, y * cell_size, cell_size, cell_size);
-                } else {
-                    g.setColor(Color.BLACK);
-                    g.drawRect(x * cell_size, y * cell_size, cell_size, cell_size);
                 }
+                g.setColor(Color.BLACK);
+                g.drawRect(x * cell_size, y * cell_size, cell_size, cell_size);
             }
         }
     }

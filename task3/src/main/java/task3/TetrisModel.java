@@ -4,8 +4,54 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Random;
 
-// TetrisModel class
-// controls the state of game field, figure
+enum TetrominoType {
+    I {
+        @Override
+        public TetroMino create() {
+            return TetroMino.createI();
+        }
+    },
+    O {
+        @Override
+        public TetroMino create() {
+            return TetroMino.createO();
+        }
+    },
+    T {
+        @Override
+        public TetroMino create() {
+            return TetroMino.createT();
+        }
+    },
+    S {
+        @Override
+        public TetroMino create() {
+            return TetroMino.createS();
+        }
+    },
+    Z {
+        @Override
+        public TetroMino create() {
+            return TetroMino.createZ();
+        }
+    },
+    J {
+        @Override
+        public TetroMino create() {
+            return TetroMino.createJ();
+        }
+    },
+    L {
+        @Override
+        public TetroMino create() {
+            return TetroMino.createL();
+        }
+    };
+
+    // перегружаемый метод для создания фигур
+    public abstract TetroMino create();
+}
+
 
 public class TetrisModel {
     private int width;
@@ -14,6 +60,7 @@ public class TetrisModel {
     private boolean[][] board;
     private int score;
     private boolean paused;
+    private TetrisController controller;
 
     public TetrisModel(int width, int height) {
         board = new boolean[width][height];
@@ -35,36 +82,10 @@ public class TetrisModel {
     }
 
     public void SpawnPiece() {
-        // create a single T-tetromino (randomly)
-//        Point[] coords = { new Point(0, 0), new Point(1, 0), new Point(2, 0), new Point(3, 0) };
-//        current_piece = new TetroMino(coords, Color.RED);
-
         Random random = new Random();
         int shape = random.nextInt(7);
-        switch (shape) {
-            case 0:
-                current_piece = TetroMino.createI();
-                break;
-            case 1:
-                current_piece = TetroMino.createO();
-                break;
-            case 2:
-                current_piece = TetroMino.createT();
-                break;
-            case 3:
-                current_piece = TetroMino.createS();
-                break;
-            case 4:
-                current_piece = TetroMino.createZ();
-                break;
-            case 5:
-                current_piece = TetroMino.createJ();
-                break;
-            case 6:
-                current_piece = TetroMino.createL();
-                break;
-        }
-//        PlacePiece();
+        TetrominoType new_piece = TetrominoType.values()[shape];
+        current_piece = new_piece.create();
     }
 
     public void MovePieceDown() {
@@ -78,8 +99,9 @@ public class TetrisModel {
             PlacePiece(); // обновляем координаты в двусвязном массиве board
             SpawnPiece(); // ТОЛЬКО выбор новой current_piece случайным образом
             if (!CanMove(current_piece, 0, 0)) { // если нельзя двигаться вниз, то игрок проиграл
-                JOptionPane.showMessageDialog(null, "GAME OVER", "Error", JOptionPane.ERROR_MESSAGE);
-                System.exit(0);
+//                JOptionPane.showMessageDialog(null, "GAME OVER", "Error", JOptionPane.ERROR_MESSAGE);
+//                System.exit(0);
+                controller.GameOver();
             }
         }
     }
@@ -116,29 +138,27 @@ public class TetrisModel {
         if (paused) return;
 
         current_piece.rotate();
-        // check if we can't rotate, return to original position
-        if (!CanMove(current_piece, 0, 0)) {
-            // сдвиги для WallKick
-            int[][] wallKick_offsets = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}};
+        if (CanMove(current_piece, 0, 0)) { return; }
 
-            boolean rotated = false;
-            for (int[] offset : wallKick_offsets) {
-                if (CanMove(current_piece, offset[0], offset[1])) {
-                    for (Point p : current_piece.getCoordinates()) {
-                        p.x += offset[0];
-                        p.y += offset[1];
-                    }
-                    rotated = true;
-                    break;
+        int[][] wallKick_offsets = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}, {1, 1}, {-1, 1}};
+
+        boolean wallKickSuccess = false;
+        for (int[] offset : wallKick_offsets) {
+            if (CanMove(current_piece, offset[0], offset[1])) {
+                for (Point p : current_piece.getCoordinates()) {
+                    p.x += offset[0];
+                    p.y += offset[1];
                 }
+                wallKickSuccess = true;
+                break;
             }
+        }
 
-            if (!rotated) {
-                System.out.println("Cannot rotate object:" + current_piece);
-                current_piece.rotate();
-                current_piece.rotate();
-                current_piece.rotate();
-            }
+        if (!wallKickSuccess) {
+            System.out.println("Cannot rotate object:" + current_piece);
+            current_piece.rotate();
+            current_piece.rotate();
+            current_piece.rotate();
         }
     }
 
@@ -192,7 +212,10 @@ public class TetrisModel {
         return true;
     }
 
-    // 3 getters
+    public void setController(TetrisController controller) {
+        this.controller = controller;
+    }
+
     public int GetScore() {
         return score;
     }
@@ -209,11 +232,6 @@ public class TetrisModel {
         return board;
     }
 
-    public boolean IsGameOver() {
-        return false;
-    }
-
-    // setter and getter for pause
     public void SetPause(boolean pause) {
         paused = pause;
     }
@@ -222,7 +240,6 @@ public class TetrisModel {
         return paused;
     }
 
-    // getters for TetrisView to creatte initial grid
     public int GetWidth() {
         return width;
     }

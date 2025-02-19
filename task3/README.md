@@ -1018,7 +1018,6 @@ public class TetrisController implements KeyListener {
     private HighScores hs;
 
     private TimerPanel timer_panel;
-    private Timer game_timer;
 
     private String player_name;
 
@@ -1030,13 +1029,6 @@ public class TetrisController implements KeyListener {
         timer_panel.StartTimer();
 
         player_name = JOptionPane.showInputDialog(null, "Enter your username: ", "New Game", JOptionPane.QUESTION_MESSAGE);
-        
-        game_timer = new Timer(1000, e -> {
-            if (!model.GetPause()) {
-                model.MovePieceDown();
-                view.repaint();
-            }
-        });
     }
 
     @Override
@@ -1161,23 +1153,11 @@ public TetrisController(TetrisModel model, TetrisView view, HighScores hs, Timer
     timer_panel.StartTimer();
 
     player_name = JOptionPane.showInputDialog(null, "Enter your username: ", "New Game", JOptionPane.QUESTION_MESSAGE);
-    
-    game_timer = new Timer(1000, e -> {
-        if (!model.GetPause()) {
-            model.MovePieceDown();
-            view.repaint();
-        }
-    });
 }
 ```
 Получает ссылки на модель, представление, панель таймера и таблицу рекордов.  
 С помощью метода [JOptionPane.showInputDialog()](https://docs.oracle.com/javase/8/docs/api/javax/swing/JOptionPane.html#showInputDialog-java.awt.Component-java.lang.Object-java.lang.String-int-) показывает 
 диалоговое окно для ввода имени игрока при старте игры.
-
-Настройка `game_timer`:  
-Каждую секунду если игра не на паузе, 
-то вызываем `MovePieceDown()` и обновляем представление методом `repaint()`.
-> Пример использования `repaint()` смотри [здесь](https://www.javatpoint.com/repaint-method-in-java)
   
 ### 7.2 Перегрузка метода `keyPressed(KeyEvent e)`
 ```java
@@ -1450,3 +1430,4 @@ frame.setJMenuBar(menu_bar);
 поля и обновляем панель счета игрока.  
 
 При завершении игрового цикла выводим сообщение "GAME OVER!" в консоль.
+> Пример использования `repaint()` смотри [здесь](https://www.javatpoint.com/repaint-method-in-java)
