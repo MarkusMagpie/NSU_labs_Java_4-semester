@@ -5,13 +5,13 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class TetrisController implements KeyListener {
-    private TetrisModel model;
-    private TetrisView view;
+    private final TetrisModel model;
+    private final TetrisView view;
 
-    private HighScores hs;
-    private TimerPanel timer_panel; // таймер для счета времен игры
-    private Timer game_timer; // таймер для игры
-    private ScorePanel score_panel;
+    private final HighScores hs;
+    private final TimerPanel timer_panel; // таймер для счета времен игры
+    private final Timer game_timer; // таймер для игры
+    private final ScorePanel score_panel;
     private String player_name;
 
     public TetrisController(TetrisModel model, TetrisView view, HighScores hs, TimerPanel timer_panel, ScorePanel sp) {
@@ -21,8 +21,6 @@ public class TetrisController implements KeyListener {
         this.timer_panel = timer_panel; // таймер секундный
         this.score_panel = sp;
 
-        timer_panel.StartTimer();
-
         player_name = JOptionPane.showInputDialog(null, "Enter your username: ", "New Game", JOptionPane.QUESTION_MESSAGE);
 
         if (player_name == null || player_name.trim().isEmpty()) {
@@ -30,7 +28,7 @@ public class TetrisController implements KeyListener {
             System.exit(0);
         }
 
-        game_timer = new Timer(500, e -> {
+        game_timer = new Timer(500, _ -> {
             if (!model.GetPause()) {
                 model.MovePieceDown();
                 view.repaint();
@@ -38,6 +36,7 @@ public class TetrisController implements KeyListener {
             }
         });
 
+        timer_panel.StartTimer();
         game_timer.start();
     }
 

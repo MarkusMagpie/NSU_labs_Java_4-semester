@@ -6,8 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class TimerPanel extends JPanel {
-    private JLabel timer_label;
-    private Timer timer;
+    private final JLabel timer_label;
+    private final Timer timer;
     private int elapsed_time; // in-game time in secs
 
     public TimerPanel() {

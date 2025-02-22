@@ -7,6 +7,8 @@ public class TetroMino {
     private final Point[] coordinates;
     private final Color color;
 
+//    public static final TetroMino I =
+
     public TetroMino(Point[] coordinates, Color color) {
         this.coordinates = coordinates;
         this.color = color;
@@ -29,7 +31,7 @@ public class TetroMino {
         int rand = random.nextInt(7);
         return switch (rand) {
             case 0 -> new TetroMino(new Point[]{
-                new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(3, 1)
+                    new Point(0, 1), new Point(1, 1), new Point(2, 1), new Point(3, 1)
             }, Color.CYAN); // createI
             case 1 -> new TetroMino(new Point[]{
                 new Point(1, 0), new Point(2, 0), new Point(1, 1), new Point(2, 1)

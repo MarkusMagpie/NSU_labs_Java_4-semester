@@ -5,10 +5,10 @@ import java.awt.*;
 import java.util.Random;
 
 public class TetrisModel {
-    private int width;
-    private int height;
+    private final int width;
+    private final int height;
     private TetroMino current_piece;
-    private boolean[][] board;
+    private final boolean[][] board;
     private int score;
     private boolean paused;
     private TetrisController controller;
@@ -48,8 +48,6 @@ public class TetrisModel {
             PlacePiece(); // обновляем координаты в двусвязном массиве board
             SpawnPiece(); // ТОЛЬКО выбор новой current_piece случайным образом
             if (!CanMove(current_piece, 0, 0)) { // если нельзя двигаться вниз, то игрок проиграл
-//                JOptionPane.showMessageDialog(null, "GAME OVER", "Error", JOptionPane.ERROR_MESSAGE);
-//                System.exit(0);
                 controller.GameOver();
             }
         }

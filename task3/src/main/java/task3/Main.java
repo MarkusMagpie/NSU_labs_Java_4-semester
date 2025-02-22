@@ -19,7 +19,7 @@ public class Main {
         JFrame frame = new JFrame("Tetris");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        frame.setSize(view.GetCellSize() * model.GetWidth() + 12, view.GetCellSize() * model.GetHeight() + 90);
+        frame.setSize(view.GetCellSize() * model.GetWidth() + model.GetWidth(), view.GetCellSize() * model.GetHeight() + 90);
         frame.setResizable(false);
 
         frame.setLayout(new BorderLayout());

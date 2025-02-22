@@ -4,8 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 
 public class ScorePanel extends JPanel {
-    private JLabel score_label;
-    private TetrisModel model;
+    private final JLabel score_label;
+    private final TetrisModel model;
 
     public ScorePanel(TetrisModel model) {
         this.model = model;

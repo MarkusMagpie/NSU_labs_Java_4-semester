@@ -19,7 +19,7 @@ public class TetrisMenuBar extends JMenuBar {
 //            }
 //        });
 
-        new_game_item.addActionListener(e -> controller.StartNewGame()); // 2 вариант записи лямбда-выражением
+        new_game_item.addActionListener(_ -> controller.StartNewGame()); // 2 вариант записи лямбда-выражением
 
         high_scores_item.addActionListener(new ActionListener() {
             @Override
