@@ -22,8 +22,6 @@ public class Main {
 //        List<Thread> supplierThreads = new ArrayList<>();
 //        List<Thread> dealerThreads = new ArrayList<>();
 
-        // Создаем хранилища для всех трех видов деталей с вместительностью
-        //   из конфигурационного файла. + еще одно хранилище для автомобилей
         Storage<Body> bodyStorage = new Storage<>(configLoader.getStorageBodySize());
         Storage<Motor> motorStorage = new Storage<>(configLoader.getStorageMotorSize());
         Storage<Accessory> accessoryStorage = new Storage<>(configLoader.getStorageAccessorySize());
@@ -33,9 +31,9 @@ public class Main {
         int body_supplier_delay = 4000;
         for (int i = 0; i < configLoader.getBodySuppliers(); ++i) {
             Supplier<Body> supplier = new Supplier<>(bodyStorage, body_supplier_delay, Body.class);
-            Thread thread = new Thread(supplier);
 //            supplierThreads.add(thread);
             body_suppliers.add(supplier);
+            Thread thread = new Thread(supplier);
             thread.start();
         }
 
@@ -43,9 +41,9 @@ public class Main {
         int motor_supplier_delay = 4000;
         for (int i = 0; i < configLoader.getMotorSuppliers(); ++i) {
             Supplier<Motor> supplier = new Supplier<>(motorStorage, motor_supplier_delay, Motor.class);
-            Thread thread = new Thread(supplier);
 //            supplierThreads.add(thread);
             motor_suppliers.add(supplier);
+            Thread thread = new Thread(supplier);
             thread.start();
         }
 
@@ -53,9 +51,9 @@ public class Main {
         int accessory_supplier_delay = 4000;
         for (int i = 0; i < configLoader.getAccessorySuppliers(); ++i) {
             Supplier<Accessory> supplier = new Supplier<>(accessoryStorage, accessory_supplier_delay, Accessory.class);
-            Thread thread = new Thread(supplier);
 //            supplierThreads.add(thread);
             accessory_suppliers.add(supplier);
+            Thread thread = new Thread(supplier);
             thread.start();
         }
 
@@ -63,9 +61,13 @@ public class Main {
         ThreadPool threadPool = new ThreadPool(configLoader.getWorkers());
 
         // задачи сборщиков cars - рабочих
-        for (int i = 0; i < configLoader.getWorkers(); ++i) {
-            threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
-        }
+//        for (int i = 0; i < configLoader.getWorkers(); ++i) {
+//            threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
+//        }
+
+        Controller controller = new Controller(carStorage, threadPool, configLoader.getStorageCarSize(),
+                bodyStorage, motorStorage, accessoryStorage);
+        new Thread(controller).start();
 
         try (FileWriter writer = new FileWriter("task4\\src\\main\\resources\\factorylog.txt", false)) {
         } catch (Exception e) {

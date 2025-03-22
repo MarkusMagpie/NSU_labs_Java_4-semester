@@ -170,28 +170,6 @@ public class FactoryGUI extends JFrame {
         return slider;
     }
 
-//    @Override
-//    public void stateChanged(ChangeEvent e) {
-//        if (e.getSource() == body_supplier_speed) {
-//            for (Supplier<Body> supplier : bodySuppliers) {
-//                supplier.setDelay(body_supplier_speed.getValue());
-//            }
-//
-//        } else if (e.getSource() == motor_supplier_speed) {
-//            for (Supplier<Motor> supplier : motorSuppliers) {
-//                supplier.setDelay(motor_supplier_speed.getValue());
-//            }
-//        } else if (e.getSource() == accessory_supplier_speed) {
-//            for (Supplier<Accessory> supplier : accessorySuppliers) {
-//                supplier.setDelay(accessory_supplier_speed.getValue());
-//            }
-//        } else if (e.getSource() == dealer_speed) {
-//            for (Dealer dealer : dealers) {
-//                dealer.setDelay(dealer_speed.getValue());
-//            }
-//        }
-//    }
-
     public void updateStats(int body_storage, int motor_storage, int accessory_storage, int car_storage, int sold_cars) {
         body_storage_label.setText("Body storage: " + body_storage + "/" + body_storage_capacity);
         motor_storage_label.setText("Motor storage: " + motor_storage + "/" + motor_storage_capacity);

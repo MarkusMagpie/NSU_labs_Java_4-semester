@@ -43,6 +43,7 @@ public class Supplier<T extends Part> implements Runnable {
 
     public T createPart() {
         try {
+            // Reflection is a mechanism for studying data about a program during its execution.
             return part_type.getConstructor(int.class).newInstance(++id_counter);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create part " + part_type + " with id " + id_counter, e);

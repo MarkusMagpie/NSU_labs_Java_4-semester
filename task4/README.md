@@ -317,57 +317,65 @@ public class Worker implements Runnable {
         this.accessory_storage = accessory_storage;
     }
 
-    @Override
-    public void run() {
-        try {
-            while (!Thread.currentThread().isInterrupted()) {
-                Body body = body_storage.get();
-                Motor motor = motor_storage.get();
-                Accessory accessory = accessory_storage.get();
+   @Override
+   public void run() {
+      try {
+         Body body = body_storage.get();
+         Motor motor = motor_storage.get();
+         Accessory accessory = accessory_storage.get();
 
-                Car car = new Car(++car_counter, body, motor, accessory);
-                car_storage.add(car);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
+         Car car = new Car(++car_counter, body, motor, accessory);
+         car_storage.add(car);
+      } catch (InterruptedException e) {
+         Thread.currentThread().interrupt();
+      }
+   }
 }
 ```
-В данном классе происходит "сборка автомобилей" из его частей, и поставка
+`22.03` - в данном классе происходит сборка одного автомобиля из его частей, и поставка
 автомобиля на хранилище готовой продукции.
 
 ### 1.5.1 метод `run()`
 ```java
 @Override
 public void run() {
-    try {
-        while (!Thread.currentThread().isInterrupted()) {
-            Body body = body_storage.get();
-            Motor motor = motor_storage.get();
-            Accessory accessory = accessory_storage.get();
+   try {
+      Body body = body_storage.get();
+      Motor motor = motor_storage.get();
+      Accessory accessory = accessory_storage.get();
 
-            Car car = new Car(++car_counter, body, motor, accessory);
-            car_storage.add(car);
-        }
-    } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-    }
+      Car car = new Car(++car_counter, body, motor, accessory);
+      car_storage.add(car);
+   } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+   }
 }
 ```
-Рабочий постоянно собирает автомобили, пока поток не будет прерван.  
+`22.03` - Рабочий теперь выполняет сборку одного автомобиля как 
+задачу, после чего завершается. 
+Это сделано для того, чтобы контроллер склада мог создавать задачи
+на сборку автомобиля только при появлении свободного места на складе 
+готовой продукции. 
+Таким образом, рабочие не работают в бесконечном цикле, а получают задачу, 
+выполняют сборку и завершают свою работу.  
+
 Методы `body_storage.get()`, `motor_storage.get()`, 
 `accessory_storage.get()` блокируют поток, если соответствующих 
 деталей нет в хранилищах. Рабочий ждет, пока детали не появятся и только
 затем строит машину и пробует ее добавить в хранилище готовой продукции:
 если хранилище заполнено, поток блокируется до освобождения места.
 
-Поток может не блокироваться а просто быть прерванным по обработке исключений.
+Поток может не блокироваться, а просто быть прерванным по обработке исключений.
 
-Два важных замечания:
-1. Использование `synchronized` методов в классе `Storage` 
+Важные замечания:
+1. `22.03` - `Controller` склада готовой продукции отслеживает количество
+автомобилей в хранилище и, когда обнаруживает освобождение места 
+(после продажи автомобиля), 
+добавляет новую задачу в пул потоков для сборки автомобиля.
+
+2. Использование `synchronized` методов в классе `Storage` 
 гарантирует корректную работу с хранилищами в многопоточной среде.
-2. Если в хранилищах нет деталей или место в `car_storage` заполнено, 
+3. Если в хранилищах нет деталей или место в `car_storage` заполнено, 
 поток рабочего блокируется до изменения условий.
 
 ## 1.6 Класс `Dealer` - его экземпляры выполняются потоками
@@ -596,10 +604,9 @@ public class Main {
         // пул потоков ONLY для рабочих
         ThreadPool threadPool = new ThreadPool(configLoader.getWorkers());
 
-        // задачи сборщиков cars - рабочих
-        for (int i = 0; i < configLoader.getWorkers(); ++i) {
-            threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
-        }
+       Controller controller = new Controller(carStorage, threadPool, configLoader.getStorageCarSize(),
+               bodyStorage, motorStorage, accessoryStorage);
+       new Thread(controller).start();
 
         try (FileWriter writer = new FileWriter("task4\\src\\main\\resources\\factorylog.txt", false)) {
         } catch (Exception e) {
@@ -685,15 +692,9 @@ Supplier<Body> supplier = new Supplier<>(bodyStorage, body_supplier_delay, Body.
 ### 1.8.2 Настройка рабочих
 ```java
 ThreadPool threadPool = new ThreadPool(configLoader.getWorkers());
-
-for (int i = 0; i < configLoader.getWorkers(); ++i) {
-    threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
-}
 ```
 Создаем конструктором класса `ThreadPool` новый пул потоков для 
-управления рабочими.  
-Каждый рабочий получает свою задачу (сборка автомобилей и их добавление
-в хранилище).
+управления рабочими.
 
 ### 1.8.3 Очистка файла лога "factorylog.txt"
 ```java
@@ -762,9 +763,112 @@ ActionListener listener)](https://docs.oracle.com/javase/8/docs/api/javax/swing/
 не выполняется само по себе, а образует реализацию метода, 
 определенного в функциональном интерфейсе!
 
-## 1.9 Директория `threadpool`: классы `Task` и `ThreadPool`
+## `22.03` - 1.9 Класс `Controller` - поддержание количества задач
+```java
+public class Controller implements Runnable {
+    private final ThreadPool threadPool;
+    private final int capacity;
+    private final Storage<Body> bodyStorage;
+    private final Storage<Motor> motorStorage;
+    private final Storage<Accessory> accessoryStorage;
+    private final Storage<Car> carStorage;
 
-### 1.9.1 класс `Task`
+    public Controller(Storage<Car> carStorage, ThreadPool threadPool, int capacity,
+                               Storage<Body> bodyStorage, Storage<Motor> motorStorage, Storage<Accessory> accessoryStorage) {
+        this.carStorage = carStorage;
+        this.threadPool = threadPool;
+        this.capacity = capacity;
+        this.bodyStorage = bodyStorage;
+        this.motorStorage = motorStorage;
+        this.accessoryStorage = accessoryStorage;
+    }
+
+    @Override
+    public void run() {
+//        System.out.println("Controller started");
+        // изначально заполняем пул задач до заполнения склада
+        int initialTasks = capacity - carStorage.getCurrentSize();
+        for (int i = 0; i < initialTasks; i++) {
+            threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
+        }
+
+        // затем контроллер засыпает и ждет, когда будет продана машина (из хранилища)
+        while (!Thread.currentThread().isInterrupted()) {
+            synchronized (carStorage) {
+                try {
+                    // ожидаем уведомления от метода get() в хранилище, который вызывается при продаже машины
+                    carStorage.wait();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+            // при пробуждении вычисляем, сколько свободных мест осталось
+            int freeSlots = capacity - carStorage.getCurrentSize();
+            for (int i = 0; i < freeSlots; i++) {
+                threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
+            }
+        }
+    }
+}
+```
+Отвечает за поддержание количества задач на сборку автомобилей в 
+пуле потоков ровно в количестве, равном вместимости склада 
+готовой продукции.   
+Логика работы класса `Controller` такова:
+1. Заполняем пул задач до заполнения склада:  
+```java
+int initialTasks = capacity - carStorage.getCurrentSize();
+for (int i = 0; i < initialTasks; i++) {
+   threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
+}
+```
+Вычисляем, сколько свободных мест осталось в хранилище автомобилей, 
+используя разность между максимальной вместимостью `capacity` и 
+текущим количеством автомобилей `carStorage.getCurrentSize()`.  
+Затем добавляем в пул потоков ровно столько задач, сколько свободных мест. 
+Каждая задача представляет собой одну сборку автомобиля - то есть 
+объект класса `Worker`, завершающий работу после сборки одного авто.
+2. ожидание события - продажи
+```java
+synchronized (carStorage) {
+    try {
+        carStorage.wait();
+    } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        break;
+    }
+}
+```
+после  первоначального заполнения задач контроллер 
+входит в бесконечный цикл, в котором синхронизируется на объекте
+`carStorage` и вызывает метод `wait()`. 
+Это значит что контроллер будет засыпать, пока не появится уведомление
+`notifyAll()` о том что автомобиль убран из хранилища дилером 
+(метод `get()` вызванный дилером). 
+
+3. добавление задач
+```java
+int freeSlots = capacity - carStorage.getCurrentSize();
+for (int i = 0; i < freeSlots; i++) {
+    threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
+}
+```
+когда контроллер опять пробудился, он снова вычисляет, 
+сколько свободных мест осталось в хранилище. 
+Для каждого освободившегося места контроллер добавляет новую задачу
+на сборку автомобиля в пул потоков.
+
+Еще раз вкратце:
+- заполнил свободные места
+- перешел в режим ожидания с помощью `wait()`
+- если дилер забрал машину, а значит вызвал метод `notifyAll()`, контроллер
+  пробуждается и пересматривает количество свободных мест
+
+
+## 1.10 Директория `threadpool`: классы `Task` и `ThreadPool`
+
+### 1.10.1 класс `Task`
 ```java
 public class Task {
     private final Runnable task;
@@ -786,7 +890,7 @@ public class Task {
 > method to be called in that separately executing thread.
 
 
-### 1.9.2 Класс `ThreadPool`
+### 1.10.2 Класс `ThreadPool`
 ```java
 public class ThreadPool {
     private final Queue<Task> task_queue = new LinkedList<>();
@@ -852,13 +956,11 @@ public class ThreadPool {
 ```
 Класс `ThreadPool` реализует пул потоков - механизм, 
 который позволяет эффективно управлять выполнением задач
-с помощью ограниченного числа потоков. 
-
-В моей реализации пул потоков применяется только к рабочим.
+с помощью ограниченного числа потоков. Применяется к рабочим.
 
 Поля:
  - `private final Queue<Task> task_queue = new LinkedList<>()` - это очередь, 
-хранящая задачи, которые будут выполняться. Про `LinkedList<>()` говорил выше.
+хранящая задачи, которые будут выполняться. 
  - `private final List<Thread> threads` - список рабочих потоков, каждый 
 поток будет забирать задачи из `task_queue` методом `poll()` 
 и выполнять их методом `execute()` из класса `Task` (подразумевается 
@@ -867,7 +969,7 @@ public class ThreadPool {
 работой всех потоков. Ключевое слово `volatile` гарантирует, что 
 изменения переменной будут сразу видны всем потокам.
 
-### 1.9.2.1 Конструктор `ThreadPool(int num_threads)`
+### 1.10.2.1 Конструктор `ThreadPool(int num_threads)`
 ```java
 public ThreadPool(int num_threads) {
     threads = new ArrayList<>();
@@ -881,7 +983,7 @@ public ThreadPool(int num_threads) {
 Создаем `num_threads` потоков, где каждому передается `this::workerLoop` (это метод, который потоки выполняют),
 а затем все созданные потоки добавляются в поле потоков `threads` и запускаются.
 
-### 1.9.2.2 Метод `addTask(Task task)`
+### 1.10.2.2 Метод `addTask(Task task)`
 ```java
 public synchronized void addTask(Task task) {
     if (is_running) {
@@ -893,7 +995,7 @@ public synchronized void addTask(Task task) {
 Если флаг `true` то добавляем таск в `Queue<Task> task_queue` и 
 вызывааем `notify()` чтобы разбудить ожидающий поток.
 
-### 1.9.2.3 Метод `workerLoop()`
+### 1.10.2.3 Метод `workerLoop()`
 ```java
 private void workerLoop() {
     while (is_running || !task_queue.isEmpty()) {
@@ -946,7 +1048,7 @@ private void workerLoop() {
  - если остались в очереди задач таковые, они довыполняются
  - прокнется условие на `return`.
 
-### 1.9.2.4 Метод `shutdown()`
+### 1.10.2.4 Метод `shutdown()`
 ```java
 public void shutdown() {
     is_running = false;
