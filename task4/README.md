@@ -319,63 +319,103 @@ public class Worker implements Runnable {
 
    @Override
    public void run() {
-      try {
-         Body body = body_storage.get();
-         Motor motor = motor_storage.get();
-         Accessory accessory = accessory_storage.get();
+      while (!Thread.currentThread().isInterrupted()) {
+         try {
+            // ждем пока есть место на складе машин
+            synchronized (car_storage) {
+               while (car_storage.isFull()) {
+                  car_storage.wait();
+               }
+            }
 
-         Car car = new Car(++car_counter, body, motor, accessory);
-         car_storage.add(car);
-      } catch (InterruptedException e) {
-         Thread.currentThread().interrupt();
+            Body body = body_storage.get();
+            Motor motor = motor_storage.get();
+            Accessory accessory = accessory_storage.get();
+
+            Car car = new Car(++car_counter, body, motor, accessory);
+
+            synchronized (car_storage) {
+               car_storage.add(car);
+               car_storage.notifyAll(); // сообщаем контроллеру, что склад изменился
+            }
+         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            break;
+         }
       }
    }
 }
 ```
-`22.03` - в данном классе происходит сборка одного автомобиля из его частей, и поставка
-автомобиля на хранилище готовой продукции.
 
 ### 1.5.1 метод `run()`
 ```java
 @Override
 public void run() {
-   try {
-      Body body = body_storage.get();
-      Motor motor = motor_storage.get();
-      Accessory accessory = accessory_storage.get();
+   while (!Thread.currentThread().isInterrupted()) {
+      try {
+         synchronized (car_storage) {
+            while (car_storage.isFull()) {
+               car_storage.wait();
+            }
+         }
 
-      Car car = new Car(++car_counter, body, motor, accessory);
-      car_storage.add(car);
-   } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
+         Body body = body_storage.get();
+         Motor motor = motor_storage.get();
+         Accessory accessory = accessory_storage.get();
+
+         Car car = new Car(++car_counter, body, motor, accessory);
+
+         synchronized (car_storage) {
+            car_storage.add(car);
+            car_storage.notifyAll(); // сообщаем контроллеру, что склад изменился
+         }
+      } catch (InterruptedException e) {
+         Thread.currentThread().interrupt();
+         break;
+      }
    }
 }
 ```
-`22.03` - Рабочий теперь выполняет сборку одного автомобиля как 
-задачу, после чего завершается. 
-Это сделано для того, чтобы контроллер склада мог создавать задачи
-на сборку автомобиля только при появлении свободного места на складе 
-готовой продукции. 
-Таким образом, рабочие не работают в бесконечном цикле, а получают задачу, 
-выполняют сборку и завершают свою работу.  
+Worker реализует логику рабочего. 
+Задача - собирать автомобили из деталей и 
+размещать их на складе готовой продукции. 
+Рабочий функционирует в рамках пула потоков `ThreadPool`, 
+обеспечивая многопоточную сборку автомобилей.
 
-Методы `body_storage.get()`, `motor_storage.get()`, 
-`accessory_storage.get()` блокируют поток, если соответствующих 
-деталей нет в хранилищах. Рабочий ждет, пока детали не появятся и только
-затем строит машину и пробует ее добавить в хранилище готовой продукции:
-если хранилище заполнено, поток блокируется до освобождения места.
-
-Поток может не блокироваться, а просто быть прерванным по обработке исключений.
+Алгоритм работы:   
+1. рабочий работает до прерывания цикла.
+2. ожидаем свободного места на складе машин:
+```java
+synchronized (car_storage) {
+   while (car_storage.isFull()) {
+      car_storage.wait();
+   }
+}
+```
+Если склад полон, то рабочий блокируется. При освобождении места на складе,
+поток пробуждается.
+3. получаем детали из хранилища
+```java
+Body body = body_storage.get();
+Motor motor = motor_storage.get();
+Accessory accessory = accessory_storage.get();
+```
+если деталей нету, то поток блокируется.
+4. создаем автомобиль
+5. добавляем на склад
+```java
+synchronized (car_storage) {
+   car_storage.add(car);
+   car_storage.notifyAll(); // сообщаем контроллеру, что склад изменился
+}
+```
+После добавления автомобиля рабочий уведомляет все ожидающие потоки через `notifyAll()`, включая контроллер.
+Значит контроллер отслеживает изменения состояния склада.
 
 Важные замечания:
-1. `22.03` - `Controller` склада готовой продукции отслеживает количество
-автомобилей в хранилище и, когда обнаруживает освобождение места 
-(после продажи автомобиля), 
-добавляет новую задачу в пул потоков для сборки автомобиля.
-
-2. Использование `synchronized` методов в классе `Storage` 
+1. Использование `synchronized` методов в классе `Storage` 
 гарантирует корректную работу с хранилищами в многопоточной среде.
-3. Если в хранилищах нет деталей или место в `car_storage` заполнено, 
+2. Если в хранилищах нет деталей или место в `car_storage` заполнено, 
 поток рабочего блокируется до изменения условий.
 
 ## 1.6 Класс `Dealer` - его экземпляры выполняются потоками
@@ -792,78 +832,96 @@ public class Controller implements Runnable {
             threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
         }
 
-        // затем контроллер засыпает и ждет, когда будет продана машина (из хранилища)
-        while (!Thread.currentThread().isInterrupted()) {
-            synchronized (carStorage) {
-                try {
-                    // ожидаем уведомления от метода get() в хранилище, который вызывается при продаже машины
-                    carStorage.wait();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
+       // затем контроллер засыпает и ждет, когда будет продана машина (из хранилища)
+       while (!Thread.currentThread().isInterrupted()) {
+          synchronized (carStorage) {
+             try {
+                // ожидаем уведомления о продаже машины дилером
+                carStorage.wait();
+
+                // будим всех рабочих при появлении места
+                if (!carStorage.isFull()) {
+                   carStorage.notifyAll();
                 }
-            }
-            // при пробуждении вычисляем, сколько свободных мест осталось
-            int freeSlots = capacity - carStorage.getCurrentSize();
-            for (int i = 0; i < freeSlots; i++) {
-                threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
-            }
-        }
+             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+             }
+          }
+       }
     }
 }
 ```
-Отвечает за поддержание количества задач на сборку автомобилей в 
-пуле потоков ровно в количестве, равном вместимости склада 
-готовой продукции.   
-Логика работы класса `Controller` такова:
-1. Заполняем пул задач до заполнения склада:  
+Класс `Controller` отвечает за управление процессом сборки автомобилей 
+на фабрике. Задача - создавать и распределять задачи по сборке машин 
+между рабочими потоками `Worker`, используя пул потоков `ThreadPool`.
+
+1. инициализация начальных задач
 ```java
 int initialTasks = capacity - carStorage.getCurrentSize();
 for (int i = 0; i < initialTasks; i++) {
-   threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
-}
-```
-Вычисляем, сколько свободных мест осталось в хранилище автомобилей, 
-используя разность между максимальной вместимостью `capacity` и 
-текущим количеством автомобилей `carStorage.getCurrentSize()`.  
-Затем добавляем в пул потоков ровно столько задач, сколько свободных мест. 
-Каждая задача представляет собой одну сборку автомобиля - то есть 
-объект класса `Worker`, завершающий работу после сборки одного авто.
-2. ожидание события - продажи
-```java
-synchronized (carStorage) {
-    try {
-        carStorage.wait();
-    } catch (InterruptedException e) {
-        Thread.currentThread().interrupt();
-        break;
-    }
-}
-```
-после  первоначального заполнения задач контроллер 
-входит в бесконечный цикл, в котором синхронизируется на объекте
-`carStorage` и вызывает метод `wait()`. 
-Это значит что контроллер будет засыпать, пока не появится уведомление
-`notifyAll()` о том что автомобиль убран из хранилища дилером 
-(метод `get()` вызванный дилером). 
-
-3. добавление задач
-```java
-int freeSlots = capacity - carStorage.getCurrentSize();
-for (int i = 0; i < freeSlots; i++) {
     threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
 }
 ```
-когда контроллер опять пробудился, он снова вычисляет, 
-сколько свободных мест осталось в хранилище. 
-Для каждого освободившегося места контроллер добавляет новую задачу
-на сборку автомобиля в пул потоков.
+вычисляем свободные места, создаем и добавляем задачи в пул потоков. 
+Каждая задача - экземпляр `Worker`.
+  
+2. Основной цикл работы
+```java
+while (!Thread.currentThread().isInterrupted()) {
+   synchronized (carStorage) {
+       try {
+           // ожидаем уведомления о продаже машины дилером
+           carStorage.wait();
 
-Еще раз вкратце:
-- заполнил свободные места
-- перешел в режим ожидания с помощью `wait()`
-- если дилер забрал машину, а значит вызвал метод `notifyAll()`, контроллер
-  пробуждается и пересматривает количество свободных мест
+           // будим всех рабочих при появлении места
+           if (!carStorage.isFull()) {
+               carStorage.notifyAll();
+           }
+       } catch (InterruptedException e) {
+           Thread.currentThread().interrupt();
+           break;
+       }
+   }
+}
+```
+- Контроллер переходит в режим ожидания `carStorage.wait()` до тех пор, пока не будет продана машина.
+- при получении уведомления:
+- - проверяю свободное место на складе
+- - `carStorage.notifyAll()`, чтобы разбудить все потоки, 
+ожидающие возможности добавить машину на склад.
+
+То есть теперь при каждой продаже машины (удалении со склада) пробуждаются рабочие потоки для создания новых.
+
+Логика взаимодействия рабочего и контроллера:
+1. `Worker` проверяет заполнен ли склад: если да, то ждет
+```java
+synchronized (car_storage) {
+    while (car_storage.isFull()) {
+        car_storage.wait();
+    }
+}
+```
+2. `Controller` пробуждает всех Worker’ов при появлении места на складе
+```java
+synchronized (carStorage) {
+    carStorage.wait();
+    if (!carStorage.isFull()) {
+        carStorage.notifyAll();
+    }
+}
+```
+контроллер изначально ждет когда дилер продаст машину 
+  
+ПРИМЕР РАБОТЫ:
+- начало: склад заполнен `carStorage.isFull() == true`
+- `Worker 1` вызывает `carStorage.wait()` и ждет (см. пункт 1)
+- Дилер забирает машину со склада и вызывает `carStorage.notifyAll()`
+- `Controller` пробуждается, проверяет `carStorage.isFull()`, видит свободное место 
+и вызывает `carStorage.notifyAll()` (см. пункт 2)
+- `Worker 1` пробуждается, проверяет `carStorage.isFull()`:
+- - место есть - собирает машину
+- - места нема (другой `Worker` успел добавить машину) - снова вызывает `wait()`
 
 
 ## 1.10 Директория `threadpool`: классы `Task` и `ThreadPool`

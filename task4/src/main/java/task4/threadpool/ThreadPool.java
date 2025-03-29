@@ -7,11 +7,10 @@ import java.util.Queue;
 
 public class ThreadPool {
     private final Queue<Task> task_queue = new LinkedList<>();
-    private final List<Thread> threads;
+    private final List<Thread> threads = new ArrayList<>();
     private volatile boolean is_running = true;
 
     public ThreadPool(int num_threads) {
-        threads = new ArrayList<>();
         for (int i = 0; i < num_threads; ++i) {
             Thread thread = new Thread(this::workerLoop);
             threads.add(thread);
@@ -43,6 +42,7 @@ public class ThreadPool {
                 }
                 task = task_queue.poll();
             }
+            assert task != null;
             task.execute();
         }
     }

@@ -16,15 +16,30 @@ public class Worker implements Runnable {
 
     @Override
     public void run() {
-        try {
-            Body body = body_storage.get();
-            Motor motor = motor_storage.get();
-            Accessory accessory = accessory_storage.get();
+        while (!Thread.currentThread().isInterrupted()) {
+            try {
+                // ждем пока есть место на складе машин
+                synchronized (car_storage) {
+                    while (car_storage.isFull()) {
+                        car_storage.wait();
+                    }
+                }
 
-            Car car = new Car(++car_counter, body, motor, accessory);
-            car_storage.add(car);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+                Body body = body_storage.get();
+                Motor motor = motor_storage.get();
+                Accessory accessory = accessory_storage.get();
+
+                Car car = new Car(++car_counter, body, motor, accessory);
+
+                // добавляем машину на склад + уведомляем контроллер
+                synchronized (car_storage) {
+                    car_storage.add(car);
+                    car_storage.notifyAll();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
         }
     }
 }

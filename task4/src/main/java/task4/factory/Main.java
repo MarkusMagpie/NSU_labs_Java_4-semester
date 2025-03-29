@@ -60,11 +60,6 @@ public class Main {
         // пул потоков ONLY для рабочих
         ThreadPool threadPool = new ThreadPool(configLoader.getWorkers());
 
-        // задачи сборщиков cars - рабочих
-//        for (int i = 0; i < configLoader.getWorkers(); ++i) {
-//            threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
-//        }
-
         Controller controller = new Controller(carStorage, threadPool, configLoader.getStorageCarSize(),
                 bodyStorage, motorStorage, accessoryStorage);
         new Thread(controller).start();

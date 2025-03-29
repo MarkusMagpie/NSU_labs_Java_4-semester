@@ -23,7 +23,6 @@ public class Controller implements Runnable {
 
     @Override
     public void run() {
-//        System.out.println("Controller started");
         // изначально заполняем пул задач до заполнения склада
         int initialTasks = capacity - carStorage.getCurrentSize();
         for (int i = 0; i < initialTasks; i++) {
@@ -34,17 +33,18 @@ public class Controller implements Runnable {
         while (!Thread.currentThread().isInterrupted()) {
             synchronized (carStorage) {
                 try {
-                    // ожидаем уведомления от метода get() в хранилище, который вызывается при продаже машины
+                    // ожидаем уведомления о продаже машины дилером
+                    // после добавления автомобиля на склад рабочим вызывается car_storage.notifyAll()
                     carStorage.wait();
+
+                    // будим всех рабочих при появлении места
+                    if (!carStorage.isFull()) {
+                        carStorage.notifyAll();
+                    }
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
                 }
-            }
-            // при пробуждении вычисляем, сколько свободных мест осталось
-            int freeSlots = capacity - carStorage.getCurrentSize();
-            for (int i = 0; i < freeSlots; i++) {
-                threadPool.addTask(new Task(new Worker(bodyStorage, motorStorage, accessoryStorage, carStorage)));
             }
         }
     }

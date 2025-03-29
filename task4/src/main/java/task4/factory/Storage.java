@@ -39,4 +39,8 @@ public class Storage<T extends Part> {
     public int getCurrentSize() {
         return items.size();
     }
+
+    public boolean isFull() {
+        return items.size() >= capacity;
+    }
 }
