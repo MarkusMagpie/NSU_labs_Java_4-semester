@@ -1,11 +1,11 @@
-package task5.client;
+package task5.java_serialize.client;
 
-import task5.server.ChatServer;
+import task5.java_serialize.Message;
+import task5.java_serialize.Message.Type;
+import task5.java_serialize.server.ChatServer;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class ClientGUI {
     private ChatClient client;
@@ -41,21 +41,17 @@ public class ClientGUI {
         inputPanel.add(sendButton, BorderLayout.EAST);
         frame.add(inputPanel, BorderLayout.SOUTH);
 
-        // сообщения отправляются по кнопке
-        sendButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                sendMessage();
-            }
-        });
+        // сообщения отправляются по кнопке на панели
+//        sendButton.addActionListener(new ActionListener() {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                sendMessage();
+//            }
+//        });
+        sendButton.addActionListener(_ -> sendMessage());
 
-        // отправка сообщений по Enter
-        messageField.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                sendMessage();
-            }
-        });
+        // отправка сообщений по Enter (не по кнопке на панели, а кнопке клавиатуры Enter)
+        messageField.addActionListener(_ -> sendMessage());
 
         frame.setVisible(true);
 
@@ -65,18 +61,27 @@ public class ClientGUI {
     public void sendMessage() {
         String message = messageField.getText().trim();
         if (!message.isEmpty()) {
+            if (message.equalsIgnoreCase("/list")) {
+                Message listMsg = new Message(Message.Type.LIST, client.getUserName(), "");
+                client.sendMessage(listMsg);
+                messageField.setText("");
+                return;
+            }
             if (message.equalsIgnoreCase("/exit")) {
-                appendMessage(client.getUserName() + " has left the chat");
+                Message logoutMsg = new Message(Message.Type.LOGOUT, client.getUserName(), "left the chat");
+                client.sendMessage(logoutMsg);
+//                appendMessage("You have left the chat.");
                 client.closeAll();
                 System.exit(0);
             }
-            client.sendMessage(message);
+            Message msg = new Message(Type.MESSAGE, client.getUserName(), message);
+            client.sendMessage(msg);
             appendMessage("You: " + message); // в свой чат пишем от лица себя
             messageField.setText(""); // после отправки сообщения окно пустое
         }
     }
 
-    // Добавление сообщений в чат
+    // добавление сообщений в область чата
     public void appendMessage(String message) {
         chatArea.append(message + "\n");
     }

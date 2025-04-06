@@ -1,9 +1,10 @@
-package task5.server;
+package task5.java_serialize.server;
 
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -20,6 +21,8 @@ public class ChatServer {
         this.loggingEnabled = loggingEnabled;
         try {
             this.serverSocket = new ServerSocket(port);
+            // очистка файла логгирования
+            new FileWriter("task5\\src\\main\\resources\\serverlog.txt", false).close();
             log("Server started on port: " + port);
         } catch (IOException e) {
             log("Error starting server: " + e.getMessage());
