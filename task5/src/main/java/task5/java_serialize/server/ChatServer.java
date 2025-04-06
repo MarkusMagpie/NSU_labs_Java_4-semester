@@ -3,11 +3,14 @@ package task5.java_serialize.server;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.LogManager;
 
+import task5.java_serialize.Message;
+
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Properties;
 
 public class ChatServer {
@@ -16,6 +19,8 @@ public class ChatServer {
 
     private ServerSocket serverSocket;
     private static int activeClients = 0;
+
+    public static ArrayList<Message> messageHistory = new ArrayList<>();
 
     public ChatServer(int port, boolean loggingEnabled) {
         this.loggingEnabled = loggingEnabled;
@@ -82,6 +87,13 @@ public class ChatServer {
             logger.info(message);
         }
         System.out.println(message);
+    }
+
+    public static synchronized void addMessageToHistory(Message m) {
+        messageHistory.add(m);
+        if (messageHistory.size() > 10) {
+            messageHistory.removeFirst(); // удаляем самое старое сообщение
+        }
     }
 
     public static void main (String[] args) throws IOException {

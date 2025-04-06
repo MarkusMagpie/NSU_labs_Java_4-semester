@@ -28,7 +28,16 @@ public class ClientHandler implements Runnable {
             if (loginMsg.getType() == Type.LOGIN) {
                 this.userName = loginMsg.getSender();
                 clients.add(this);
-                broadcastMessage(new Message(Type.SYSTEM, "SERVER", userName + " joined the chat."));
+
+                //  новому клиенту даю историю сообщений
+                for (Message m : ChatServer.messageHistory) {
+                    out.writeObject(m);
+                }
+                out.flush();
+
+                Message msg = new Message(Type.SYSTEM, "SERVER", userName + " joined the chat.");
+                ChatServer.addMessageToHistory(msg); // добавляем сообщение о регистрации в историю
+                broadcastMessage(msg);
             }
         } catch (IOException | ClassNotFoundException e) {
             closeAll();
@@ -45,7 +54,9 @@ public class ClientHandler implements Runnable {
                 if (obj instanceof Message) {
                     Message msg = (Message) obj;
                     if (msg.getType() == Type.LOGOUT) {
-                        broadcastMessage(new Message(Type.SYSTEM, "SERVER", userName + " left the chat."));
+                        Message logoutMsg = new Message(Type.SYSTEM, "SERVER", userName + " left the chat.");
+                        ChatServer.addMessageToHistory(logoutMsg); // добавляем сообщение о выходе в историю
+                        broadcastMessage(logoutMsg);
                         break;
                     } else if (msg.getType() == Type.LIST) {
                         StringBuilder userList = new StringBuilder("Active users:\n");
@@ -57,6 +68,7 @@ public class ClientHandler implements Runnable {
                         out.writeObject(listResponse);
                         out.flush();
                     } else if (msg.getType() == Type.MESSAGE) {
+                        ChatServer.addMessageToHistory(msg); // добавляем сообщение в историю
                         broadcastMessage(msg);
                     }
                 }

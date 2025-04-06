@@ -1,6 +1,8 @@
-16:04:20.840 [main] INFO  task5.java_serialize.server.ChatServer - Server started on port: 1234
-16:05:21.019 [main] INFO  task5.java_serialize.server.ChatServer - A new client has connected! Active clients: 1
-16:05:40.606 [main] INFO  task5.java_serialize.server.ChatServer - A new client has connected! Active clients: 2
-16:06:12.749 [Thread-1] INFO  task5.java_serialize.server.ChatServer - A client has disconnected. Active clients: 1
-16:06:41.985 [Thread-0] INFO  task5.java_serialize.server.ChatServer - A client has disconnected. Active clients: 0
-16:06:41.986 [Thread-0] INFO  task5.java_serialize.server.ChatServer - No clients connected. Server shutting down...
+16:52:55.508 [main] INFO  task5.java_serialize.server.ChatServer - Server started on port: 1234
+16:53:14.570 [main] INFO  task5.java_serialize.server.ChatServer - A new client has connected! Active clients: 1
+16:53:47.289 [main] INFO  task5.java_serialize.server.ChatServer - A new client has connected! Active clients: 2
+16:55:08.302 [Thread-1] INFO  task5.java_serialize.server.ChatServer - A client has disconnected. Active clients: 1
+16:55:26.140 [main] INFO  task5.java_serialize.server.ChatServer - A new client has connected! Active clients: 2
+16:56:08.334 [Thread-2] INFO  task5.java_serialize.server.ChatServer - A client has disconnected. Active clients: 1
+16:56:12.896 [Thread-0] INFO  task5.java_serialize.server.ChatServer - A client has disconnected. Active clients: 0
+16:56:12.897 [Thread-0] INFO  task5.java_serialize.server.ChatServer - No clients connected. Server shutting down...
