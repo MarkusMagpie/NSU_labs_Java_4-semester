@@ -26,7 +26,7 @@ public class ChatServer {
         this.loggingEnabled = loggingEnabled;
         try {
             this.serverSocket = new ServerSocket(port);
-            // очистка файла логгирования
+            // очистка файла логирования
             new FileWriter("task5\\src\\main\\resources\\serverlog.txt", false).close();
             log("Server started on port: " + port);
         } catch (IOException e) {
@@ -43,7 +43,7 @@ public class ChatServer {
                 log("A new client has connected! Active clients: " + activeClients);
                 ClientHandler handler = new ClientHandler(clientSocket);
                 Thread thread = new Thread(handler);
-                thread.start();
+                thread.start(); // invoke the run() method in the new thread (в объекте ClientHandler запустилось считывание клиентских сообщений)
             }
         } catch (IOException e) {
             log("Error starting server: " + e.getMessage());
@@ -73,7 +73,7 @@ public class ChatServer {
 
     public static boolean loadLoggingFromConfig() {
         Properties properties = new Properties();
-        try (FileInputStream input = new FileInputStream("task5/src/main/resources/config.properties")) {
+        try (FileInputStream input = new FileInputStream("task5\\src\\main\\resources\\config.properties")) {
             properties.load(input);
             return Boolean.parseBoolean(properties.getProperty("server.log", "false"));
         } catch (IOException e) {
@@ -96,7 +96,7 @@ public class ChatServer {
         }
     }
 
-    public static void main (String[] args) throws IOException {
+    public static void main (String[] args) {
         int port = loadPortFromConfig(); // порт на котором сервер слушает подключения
         boolean logEnabled = loadLoggingFromConfig();
         ChatServer server = new ChatServer(port, logEnabled);

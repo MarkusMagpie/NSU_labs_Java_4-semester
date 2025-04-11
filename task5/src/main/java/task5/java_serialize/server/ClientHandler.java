@@ -6,6 +6,7 @@ import task5.java_serialize.Message.Type;
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 import static task5.java_serialize.server.ChatServer.log;
 
@@ -55,20 +56,22 @@ public class ClientHandler implements Runnable {
                     Message msg = (Message) obj;
                     if (msg.getType() == Type.LOGOUT) {
                         Message logoutMsg = new Message(Type.SYSTEM, "SERVER", userName + " left the chat.");
-                        ChatServer.addMessageToHistory(logoutMsg); // добавляем сообщение о выходе в историю
+                        ChatServer.addMessageToHistory(logoutMsg);
                         broadcastMessage(logoutMsg);
                         break;
                     } else if (msg.getType() == Type.LIST) {
-                        StringBuilder userList = new StringBuilder("Active users:\n");
+                        List<String> userNames = new ArrayList<>();
                         for (ClientHandler client : clients) {
-                            userList.append(client.userName).append("\n");
+                            userNames.add(client.userName);
                         }
-                        Message listResponse = new Message(Type.LIST, "SERVER", userList.toString());
-                        // отправляем ответ только запрашивающему клиенту
+
+                        String userList = "Active users:\n" + String.join("\n", userNames);
+                        Message listResponse = new Message(Type.LIST, "SERVER", userList);
+                        // отправляем ответ только запрашивающему клиенту!!!
                         out.writeObject(listResponse);
                         out.flush();
                     } else if (msg.getType() == Type.MESSAGE) {
-                        ChatServer.addMessageToHistory(msg); // добавляем сообщение в историю
+                        ChatServer.addMessageToHistory(msg);
                         broadcastMessage(msg);
                     }
                 }
@@ -77,7 +80,6 @@ public class ClientHandler implements Runnable {
             System.out.println("Error receiving messages from client: " + e.getMessage());
         } finally {
             closeAll();
-            ChatServer.clientDisconnected(); // уведомил сервер о выходе клиента
         }
     }
 
@@ -85,10 +87,11 @@ public class ClientHandler implements Runnable {
     public void broadcastMessage(Message msg) {
         for (ClientHandler client : clients) {
             try {
-                if (!client.userName.equals(this.userName)) {
-                    client.out.writeObject(msg);
-                    client.out.flush();
+                if (msg.getType() == Type.MESSAGE && client.userName.equals(this.userName)) {
+                    continue;
                 }
+                client.out.writeObject(msg);
+                client.out.flush();
             } catch (IOException e) {
                 closeAll();
             }
@@ -97,6 +100,7 @@ public class ClientHandler implements Runnable {
 
     public void closeAll() {
         clients.remove(this); // closeAll is called when we are in catch block -> user will leave
+        ChatServer.clientDisconnected(); // уведомил сервер о выходе клиента
         try {
             if (socket != null) socket.close();
             if (in != null) in.close();

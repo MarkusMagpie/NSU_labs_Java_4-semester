@@ -35,7 +35,7 @@ public class Message implements Serializable {
 
     @Override
     public String toString() {
-        if (type == Type.MESSAGE)
+        if (type == Type.MESSAGE || type == Type.SYSTEM)
             return sender + ": " + content;
         else
             return content;

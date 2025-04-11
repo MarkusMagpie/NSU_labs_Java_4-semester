@@ -16,14 +16,15 @@ public class ChatClient {
 
     public ChatClient(String userName, int port, String serverHost, ClientGUI gui) {
         try {
-            socket = new Socket(serverHost, port);
+            socket = new Socket(serverHost, port); // sockets provide a connection mechanism between 2 computers using TCP
+            // socket connection - 2 machines have information about each other's network location (IP and port)
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
             this.userName = userName;
             this.gui = gui;
 
-            // отправляем сообщение регистрации
-            // его получают все кроме самого отправителя
+            // отправляем сообщение регистрации серверу
+            // сервер разошлет его всем клиентам кроме самого отправителя
             Message loginMsg = new Message(Type.LOGIN, userName, "joined the chat");
             sendMessage(loginMsg);
         } catch (IOException e) {

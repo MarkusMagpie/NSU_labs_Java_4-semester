@@ -8,17 +8,15 @@ import javax.swing.*;
 import java.awt.*;
 
 public class ClientGUI {
-    private ChatClient client;
-    private JFrame frame;
-    private JTextArea chatArea;
-    private JTextField messageField;
-    private JButton sendButton;
+    private final ChatClient client;
+    private final JTextArea chatArea;
+    private final JTextField messageField;
 
     public ClientGUI(String userName, int port, String serverHost) {
         client = new ChatClient(userName, port, serverHost, this);
 
         // окно чата
-        frame = new JFrame("Chat - " + userName);
+        JFrame frame = new JFrame("Chat - " + userName);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(400, 500);
         frame.setResizable(false);
@@ -35,7 +33,7 @@ public class ClientGUI {
         // поле ввода
         JPanel inputPanel = new JPanel(new BorderLayout());
         messageField = new JTextField();
-        sendButton = new JButton("Send");
+        JButton sendButton = new JButton("Send");
 
         inputPanel.add(messageField, BorderLayout.CENTER);
         inputPanel.add(sendButton, BorderLayout.EAST);
