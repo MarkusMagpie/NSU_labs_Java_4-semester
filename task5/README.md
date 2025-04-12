@@ -985,3 +985,217 @@ public static void main(String[] args) {
 соединения с сервером.
 
 ## 2 XML сообщения
+немного теории:
+DOM (Document Object Model) - древовидное представление XML-документа в памяти. Каждый элемент XML становится узлом дерева.
+пример: 
+```xml
+<command name="logout">
+  <session>abc123</session>
+</command>
+```
+в DOM выглядит так: 
+```
+Document
+└── Element (command)
+    ├── Attribute (name="logout")
+    └── Element (session)
+        └── Text (abc123)
+```
+  
+Как устроены файлы XML?
+- **Элементы**. Это основные строительные блоки XML-документа. 
+Они заключены в теги — например, `<book>…</book>` — и могут содержать текст, атрибуты и другие элементы.
+- **Корневой элемент**.
+  Единственный элемент верхнего уровня, который содержит все остальные элементы.  
+- **Атрибуты**. Это дополнительные данные, которые можно добавить к 
+элементам, чтобы более точно указать их характеристики. 
+Они записываются внутри открывающего тега и позволяют добавлять дополнительную
+информацию без создания новых элементов. 
+Например, в элементе `<book genre="учебник">` атрибут `genre` указывает на жанр книги, что помогает более точно описать её содержание.
+- **Текстовое содержимое**. К тексту относится всё, что находится между 
+открывающим и закрывающим тегами элемента. 
+Например, `<title>XML для начинающих</title>`.
+
+? `private DataOutputStream dataOut` и `private DataInputStream dataIn` - 
+почему во второй версии программы мы выбрали такие объекты вместо 
+прежних `ObjectInputStream` и `ObjectOutputStream` для десериализации и 
+сериализации соответственно?  
+
+Ответ: `ObjectInputStream`/`ObjectOutputStream` предназначены для 
+сериализации Java-объектов, а не для работы с XML. 
+Если попытаться записать XML-строку через `ObjectOutputStream`, 
+она будет сериализована как объект `String`, что нарушит протокол.
+Также для XML сообщений по заданию используется протокол:  
+`[4 байта длины сообщения][XML данные]`.
+
+про эти 2 класса читай [здесь](https://metanit.com/java/tutorial/6.7.php).  
+если вкратце то:  
+`DataOutputStream` -  поток вывода и предназначен для записи данных примитивных типов, таких, как `int`.  
+пример использования: 
+```java
+dataOut.writeInt(data.length); //  записывает в поток целочисленное значение int
+dataOut.write(data); // записывает все байты в выходной поток
+dataOut.flush(); // сбрасывает буфер выходного потока (который строкой выше заполнил)
+```
+`DataInputStream` действует противоположным образом - он считывает из потока данные примитивных типов.
+
+
+-------------------------------------------------
+Логика программы в пекедже `xml` аналогична, теперь вместо отправки объектов 
+кастомного класса `Message` используются объекты `Document` и `Element`.  
+
+Наглядный пример из `ClientGUI` метода `SendMessage`:  
+
+как было в 1 варианте лабы:
+```java
+if (message.equalsIgnoreCase("/list")) {
+    Message listMsg = new Message(Message.Type.LIST, client.getUserName(), "");
+    client.sendMessage(listMsg);
+    messageField.setText("");
+    return;
+}
+```
+
+как стало во втором:  
+```java
+if (message.equalsIgnoreCase("/list")) {
+    try {
+        /* XML-команда list:
+         <command name=”list”>
+            <session>UNIQUE_SESSION_ID</session>
+         </command>
+         */
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.newDocument();
+        Element commandElem = doc.createElement("command");
+        commandElem.setAttribute("name", "list");
+        Element sessionElem = doc.createElement("session");
+        sessionElem.setTextContent(client.getSessionId());
+        commandElem.appendChild(sessionElem);
+        doc.appendChild(commandElem);
+        
+        client.sendXMLCommand(doc);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    messageField.setText("");
+    return;
+}
+```
+то есть теперь логика такая: приведу на примере команды `exit`:
+1. юзер ввел в поле `messageField` команду `/exit`:
+```java
+if (message.equalsIgnoreCase("/exit")) {
+    try {
+        // XML-команда logout: <command name=”logout”><session>UNIQUE_SESSION_ID</session></command>
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        Document doc = builder.newDocument();
+        Element commandElem = doc.createElement("command");
+        commandElem.setAttribute("name", "logout");
+        Element sessionElem = doc.createElement("session");
+        sessionElem.setTextContent(client.getSessionId());
+        commandElem.appendChild(sessionElem);
+        doc.appendChild(commandElem);
+        
+        client.sendXMLCommand(doc);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+//    client.closeAll();
+//    System.exit(0);
+}
+```
+собирается XML такое сообщение для сервера: 
+```xml
+<command name=”logout”>
+    <session>UNIQUE_SESSION_ID</session>
+</command>
+```
+то есть создаю элемент `command` с атрибутом `name="logout"` и элемент `session` с содержимым `UNIQUE_SESSION_ID`.  
+
+Это сообщение отправляю функцией `sendXMLCommand` в сервер.
+Надо отдельно оговорить как работает функция `writeXMLMessage`:
+```java
+private void writeXMLMessage(Document doc) throws Exception {
+    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+    StringWriter writer = new StringWriter();
+    transformer.transform(new DOMSource(doc), new StreamResult(writer));
+    byte[] data = writer.toString().getBytes(StandardCharsets.UTF_8);
+    
+    dataOut.writeInt(data.length);
+    dataOut.write(data);
+    dataOut.flush();
+}
+```
+1.1  Сначала функция использует объект `Transformer` 
+(из пакета `javax.xml.transform`) для преобразования XML-документа 
+(объект `Document`) в текстовое представление.
+   - Создаётся `Transformer` с помощью `TransformerFactory.newInstance().newTransformer()`.
+   - Далее создаётся `StringWriter` – поток, записывающий символы в строку.
+   - Метод `transformer.transform(new DOMSource(doc), new StreamResult(writer))` 
+   берёт XML-документ (DOM-дерево) и записывает его в объект `StringWriter` 
+   в виде текста.  
+
+1.2 После получения строки с XML-данными вызывается метод `toString()` у 
+`StringWriter`, затем эта строка преобразуется в массив байт с 
+использованием кодировки `UTF-8`. Это нужно, потому что в сети 
+передаются именно байты.  
+
+1.3
+   - записываем длину полученного массива байт. 
+Это важно для приемной стороны, чтобы знать, сколько байт нужно
+прочитать, прежде чем завершится документ.  
+   - После записи длины вызывается `dataOut.write(data)`, 
+который записывает все байты XML-строки в выходной поток.
+   - Вызывается `dataOut.flush()`, чтобы обеспечить немедленную 
+отправку всех накопившихся в буфере данных по потоку.
+
+
+2. теперь это сообщение будет поймано `clienthandler`-ом и 
+считаем значение у атрибута `name` в элементе `command` - это `logout`.  
+создаю серверное сообщение сообщающее об успехе: 
+```xml
+<success>
+</success>
+```
+и это сообщение отправляю обратно клиенту:
+```java
+writeXMLMessage(successDoc);
+```
+3. клинет `ChatClient` в бесконечном цикле `listenForMessages` считает 
+сообщение об успехе (сначала считал название корневого элемента и сравнил с
+сообщением `success`) и если это так, то так как никаких `listusers` нам
+не отправлялось от сервера, то делается следующее:
+```java
+gui.appendMessage("SERVER: Logout successful.");
+closeAll();
+System.exit(0);
+```
+первое сообщение является рудиментарным ибо я его вижу чуть-чуть и окно с 
+ним закрывается - ура выполнен выход (пиздец блять).
+
+описание метода чтения XML-сообщения
+```java
+public Document readXMLMessage() throws Exception {
+    // читает первые 4 байта из входного потока (DataInputStream), интерпретируя их как целое число (int)
+   int length = dataIn.readInt();
+   // создается массив байтов размером length
+   byte[] data = new byte[length];
+   // читает ровно length байтов из потока и сохраняет их в массив data
+   dataIn.readFully(data);
+   // создается поток ввода на основе массива байтов data
+    // зачем? парсер XML (DocumentBuilder) требует InputStream для чтения данных
+   ByteArrayInputStream byteStream = new ByteArrayInputStream(data);
+   // создается фабрика для получения парсера XML
+   DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+   /*
+        что происходит:
+            newDocumentBuilder() — создает объект DocumentBuilder для парсинга
+            parse(byteStream) — преобразует XML-данные из потока в объект Document
+    */
+   return factory.newDocumentBuilder().parse(byteStream);
+}
+```
+### акпкп

@@ -52,7 +52,6 @@ public class ClientGUI {
         messageField.addActionListener(_ -> sendMessage());
 
         frame.setVisible(true);
-
         client.listenForMessages();
     }
 
@@ -75,7 +74,7 @@ public class ClientGUI {
             Message msg = new Message(Type.MESSAGE, client.getUserName(), message);
             client.sendMessage(msg);
             appendMessage("You: " + message); // в свой чат пишем от лица себя
-            messageField.setText(""); // после отправки сообщения окно пустое
+            messageField.setText("");
         }
     }
 

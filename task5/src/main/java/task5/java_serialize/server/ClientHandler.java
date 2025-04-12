@@ -8,8 +8,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-import static task5.java_serialize.server.ChatServer.log;
-
 public class ClientHandler implements Runnable {
     public static ArrayList<ClientHandler> clients = new ArrayList<>();
     private Socket socket; // to establish connection between server and client
@@ -26,8 +24,8 @@ public class ClientHandler implements Runnable {
 
             // 1 полученный объект - сообщение регистрации
             Message loginMsg = (Message) in.readObject();
-            if (loginMsg.getType() == Type.LOGIN) {
-                this.userName = loginMsg.getSender();
+            if (loginMsg.type() == Type.LOGIN) {
+                this.userName = loginMsg.sender();
                 clients.add(this);
 
                 //  новому клиенту даю историю сообщений
@@ -54,12 +52,12 @@ public class ClientHandler implements Runnable {
             while ((obj = in.readObject()) != null) {
                 if (obj instanceof Message) {
                     Message msg = (Message) obj;
-                    if (msg.getType() == Type.LOGOUT) {
+                    if (msg.type() == Type.LOGOUT) {
                         Message logoutMsg = new Message(Type.SYSTEM, "SERVER", userName + " left the chat.");
                         ChatServer.addMessageToHistory(logoutMsg);
                         broadcastMessage(logoutMsg);
                         break;
-                    } else if (msg.getType() == Type.LIST) {
+                    } else if (msg.type() == Type.LIST) {
                         List<String> userNames = new ArrayList<>();
                         for (ClientHandler client : clients) {
                             userNames.add(client.userName);
@@ -70,7 +68,7 @@ public class ClientHandler implements Runnable {
                         // отправляем ответ только запрашивающему клиенту!!!
                         out.writeObject(listResponse);
                         out.flush();
-                    } else if (msg.getType() == Type.MESSAGE) {
+                    } else if (msg.type() == Type.MESSAGE) {
                         ChatServer.addMessageToHistory(msg);
                         broadcastMessage(msg);
                     }
@@ -87,7 +85,7 @@ public class ClientHandler implements Runnable {
     public void broadcastMessage(Message msg) {
         for (ClientHandler client : clients) {
             try {
-                if (msg.getType() == Type.MESSAGE && client.userName.equals(this.userName)) {
+                if (msg.type() == Type.MESSAGE && client.userName.equals(this.userName)) {
                     continue;
                 }
                 client.out.writeObject(msg);
@@ -106,7 +104,7 @@ public class ClientHandler implements Runnable {
             if (in != null) in.close();
             if (out != null) out.close();
         } catch (IOException e) {
-            log("Error closing socket: " + e.getMessage());
+            System.out.println("Error closing socket: " + e.getMessage());
         }
     }
 }
