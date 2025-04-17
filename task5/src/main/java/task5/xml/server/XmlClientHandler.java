@@ -2,6 +2,7 @@ package task5.xml.server;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import task5.xml.client.XmlChatClient;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
@@ -35,14 +36,13 @@ public class XmlClientHandler implements Runnable {
                 // извлекаем имя пользователя и тип клиента (для примера тип не обрабатываем)
                 userName = root.getElementsByTagName("name").item(0).getTextContent();
                 // генерация сессионного идентификатора
-                String sessionId = UUID.randomUUID().toString(); // уникальный идентификатор сессии, например UUID
+                String sessionId = UUID.randomUUID().toString(); // уникальный идентификатор сессии - UUID
                 clients.add(this);
 
+                // сначала отправить <success> а уже после него выдать клиенту все накопленные события из истории
                 // отправляем ответ успешного логина с сессионным id:
                 /*
-                <success>
-	                <session>UNIQUE_SESSION_ID</session>
-                </success>
+                <success><session>UNIQUE_SESSION_ID</session></success>
                  */
                 Document successDoc = createDocument();
                 Element successElem = successDoc.createElement("success");
@@ -51,9 +51,15 @@ public class XmlClientHandler implements Runnable {
                 successElem.appendChild(sessionElem);
                 successDoc.appendChild(successElem);
 
+                // 1 - отправляю ответ на логин (ответ - success) НОВОМУ клиенту
                 writeXMLMessage(successDoc);
 
-                // рассылаем всем сообщение о входе нового пользователя
+                // 2 - отправляю всю историю новому клиенту
+                for (Document historyDoc : XmlChatServer.messageHistory) {
+                    writeXMLMessage(historyDoc);
+                }
+
+                // 3 - подготовка сообщения о входе нового пользователя для других
                 Document userLoginDoc = createDocument();
                 Element eventElem = userLoginDoc.createElement("event");
                 eventElem.setAttribute("name", "userlogin");
@@ -62,12 +68,15 @@ public class XmlClientHandler implements Runnable {
                 eventElem.appendChild(nameElem);
                 userLoginDoc.appendChild(eventElem);
 
+                // 4 - отправка сообщения НОВОМУ клиенту
+                writeXMLMessage(userLoginDoc);
+
+                // 5 - добавка в историю и рассылка ВСЕМ остальным клиентам
+                XmlChatServer.addMessageToHistory(userLoginDoc);
                 broadcastXML(userLoginDoc);
             } else {
                 /* ответ ошибки логина
-                <error>
-	                <message>REASON</message>
-                </error>
+                <error><message>REASON</message></error>
                  */
                 Document errorDoc = createDocument();
                 Element errorElem = errorDoc.createElement("error");
@@ -110,6 +119,7 @@ public class XmlClientHandler implements Runnable {
                         eventElem.appendChild(fromElem);
                         eventDoc.appendChild(eventElem);
 
+                        XmlChatServer.addMessageToHistory(eventDoc);
                         broadcastXML(eventDoc);
                         break;
                     }
@@ -155,6 +165,7 @@ public class XmlClientHandler implements Runnable {
                         eventElem.appendChild(nameElem);
                         eventDoc.appendChild(eventElem);
 
+                        XmlChatServer.addMessageToHistory(eventDoc);
                         broadcastXML(eventDoc);
                         return;
                     }
@@ -162,6 +173,7 @@ public class XmlClientHandler implements Runnable {
             }
         } catch (Exception e) {
             System.out.println("Error in XML client handler: " + e.getMessage());
+            System.out.println("Disconnected client: " + userName);
         } finally {
             closeAll();
             XmlChatServer.clientDisconnected();

@@ -50,7 +50,8 @@ public class XmlChatClient {
                 sessionId = root.getElementsByTagName("session").item(0).getTextContent();
                 System.out.println("Logged in with session id: " + sessionId);
             } else {
-                // сервер вернул ошибку -> выводим сообщение
+                // сервер вернул ошибку при логине:
+                // <error><message>REASON</message></error>
                 JOptionPane.showMessageDialog(null, "Login error: " +
                         root.getElementsByTagName("message").item(0).getTextContent());
                 System.exit(0);

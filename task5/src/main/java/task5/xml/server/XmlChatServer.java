@@ -5,10 +5,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import org.w3c.dom.Document;
 import task5.java_serialize.server.ChatServer;
 import static task5.java_serialize.server.ChatServer.loadLoggingFromConfig;
 
@@ -18,6 +20,8 @@ public class XmlChatServer {
 
     private ServerSocket serverSocket;
     private static int activeClients = 0;
+
+    public static ArrayList<Document> messageHistory = new ArrayList<>();
 
     public XmlChatServer(int port, boolean loggingEnabled) {
         this.loggingEnabled = loggingEnabled;
@@ -65,6 +69,13 @@ public class XmlChatServer {
             logger.info(message);
         }
         System.out.println(message);
+    }
+
+    public static synchronized void addMessageToHistory(Document messageDoc) {
+        messageHistory.add(messageDoc);
+        if (messageHistory.size() > 10) {
+            messageHistory.removeFirst();
+        }
     }
 
     public static void main(String[] args) {

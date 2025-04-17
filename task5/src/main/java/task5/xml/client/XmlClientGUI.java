@@ -57,9 +57,7 @@ public class XmlClientGUI {
             if (message.equalsIgnoreCase("/list")) {
                 try {
                     /* XML-команда list:
-                     <command name=”list”>
-                        <session>UNIQUE_SESSION_ID</session>
-                     </command>
+                     <command name=”list”><session>UNIQUE_SESSION_ID</session></command>
                      */
                     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                     DocumentBuilder builder = factory.newDocumentBuilder();
@@ -77,8 +75,7 @@ public class XmlClientGUI {
                 }
                 messageField.setText("");
                 return;
-            }
-            if (message.equalsIgnoreCase("/exit")) {
+            } else if (message.equalsIgnoreCase("/exit")) {
                 try {
                     // XML-команда logout: <command name=”logout”><session>UNIQUE_SESSION_ID</session></command>
                     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
