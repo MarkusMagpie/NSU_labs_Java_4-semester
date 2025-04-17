@@ -53,75 +53,118 @@ public class XmlClientGUI {
 
     public void sendMessage() {
         String message = messageField.getText().trim();
-        if (!message.isEmpty()) {
-            if (message.equalsIgnoreCase("/list")) {
-                try {
-                    /* XML-команда list:
-                     <command name=”list”><session>UNIQUE_SESSION_ID</session></command>
-                     */
-                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                    DocumentBuilder builder = factory.newDocumentBuilder();
-                    Document doc = builder.newDocument();
-                    Element commandElem = doc.createElement("command");
-                    commandElem.setAttribute("name", "list");
-                    Element sessionElem = doc.createElement("session");
-                    sessionElem.setTextContent(client.getSessionId());
-                    commandElem.appendChild(sessionElem);
-                    doc.appendChild(commandElem);
+        if (message.isEmpty()) return;
 
-                    client.sendXMLCommand(doc);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                messageField.setText("");
-                return;
-            } else if (message.equalsIgnoreCase("/exit")) {
-                try {
-                    // XML-команда logout: <command name=”logout”><session>UNIQUE_SESSION_ID</session></command>
-                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                    DocumentBuilder builder = factory.newDocumentBuilder();
-                    Document doc = builder.newDocument();
-                    Element commandElem = doc.createElement("command");
-                    commandElem.setAttribute("name", "logout");
-                    Element sessionElem = doc.createElement("session");
-                    sessionElem.setTextContent(client.getSessionId());
-                    commandElem.appendChild(sessionElem);
-                    doc.appendChild(commandElem);
-
-                    client.sendXMLCommand(doc);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-//                client.closeAll();
-//                System.exit(0);
-            }
+        if (message.equalsIgnoreCase("/list")) {
             try {
-                /* XML-команда отправки обычного сообщения от клиента к серверу:
-                 <command name=”message”>
-                    <message>MESSAGE</message>
-                    <session>UNIQUE_SESSION_ID</session>
-                 </command>
-                 */
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance(); // создание билдера для XML
-                DocumentBuilder builder = factory.newDocumentBuilder(); // создание документа с помощью билдера
-                Document doc = builder.newDocument(); // создание нового документа
+                // XML-команда list:<command name=”list”><session>UNIQUE_SESSION_ID</session></command>
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document doc = builder.newDocument();
                 Element commandElem = doc.createElement("command");
-                commandElem.setAttribute("name", "message");
-                Element messageElem = doc.createElement("message");
-                messageElem.setTextContent(message);
+                commandElem.setAttribute("name", "list");
                 Element sessionElem = doc.createElement("session");
                 sessionElem.setTextContent(client.getSessionId());
-                commandElem.appendChild(messageElem);
                 commandElem.appendChild(sessionElem);
                 doc.appendChild(commandElem);
 
                 client.sendXMLCommand(doc);
-                appendMessage("You: " + message);
             } catch (Exception e) {
                 e.printStackTrace();
             }
             messageField.setText("");
+            return;
+        } else if (message.equalsIgnoreCase("/exit")) {
+            try {
+                // XML-команда logout: <command name=”logout”><session>UNIQUE_SESSION_ID</session></command>
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document doc = builder.newDocument();
+                Element commandElem = doc.createElement("command");
+                commandElem.setAttribute("name", "logout");
+                Element sessionElem = doc.createElement("session");
+                sessionElem.setTextContent(client.getSessionId());
+                commandElem.appendChild(sessionElem);
+                doc.appendChild(commandElem);
+
+                client.sendXMLCommand(doc);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+//                client.closeAll();
+//                System.exit(0);
+        } else if (message.toLowerCase().startsWith("/whisper ")) {
+            try {
+                // message = ["/whisper", "TARGET", "BODY OF MESSAGE"]
+                /* XML-команда для секретной переписки с одним клиентом:
+                <command name=”whisper”>
+                    <session>UNIQUE_SESSION_ID</session>
+                    <target>USERNAME</target>
+                    <message>MESSAGE</message>
+                </command>
+                 */
+                String[] parts = message.split("\\s+", 3);
+                if (parts.length < 3) {
+                    System.out.println("Invalid command: /whisper <user> <message>");
+                    return;
+                }
+                String target = parts[1];
+                String body = parts[2];
+                System.out.println("Whispering to " + target + ": " + body);
+
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                DocumentBuilder builder = factory.newDocumentBuilder();
+                Document doc = builder.newDocument();
+
+                Element commandElem = doc.createElement("command");
+                commandElem.setAttribute("name", "whisper");
+                Element sessionElem = doc.createElement("session");
+                sessionElem.setTextContent(client.getSessionId());
+                commandElem.appendChild(sessionElem);
+
+                Element targetElem = doc.createElement("target");
+                targetElem.setTextContent(target);
+                commandElem.appendChild(targetElem);
+
+                Element messageElem = doc.createElement("message");
+                messageElem.setTextContent(body);
+                commandElem.appendChild(messageElem);
+
+                doc.appendChild(commandElem);
+
+                client.sendXMLCommand(doc);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            messageField.setText("");
+            return;
         }
+        try {
+            /* XML-команда отправки обычного сообщения от клиента к серверу:
+             <command name=”message”>
+                <message>MESSAGE</message>
+                <session>UNIQUE_SESSION_ID</session>
+             </command>
+             */
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance(); // создание билдера для XML
+            DocumentBuilder builder = factory.newDocumentBuilder(); // создание документа с помощью билдера
+            Document doc = builder.newDocument(); // создание нового документа
+            Element commandElem = doc.createElement("command");
+            commandElem.setAttribute("name", "message");
+            Element messageElem = doc.createElement("message");
+            messageElem.setTextContent(message);
+            Element sessionElem = doc.createElement("session");
+            sessionElem.setTextContent(client.getSessionId());
+            commandElem.appendChild(messageElem);
+            commandElem.appendChild(sessionElem);
+            doc.appendChild(commandElem);
+
+            client.sendXMLCommand(doc);
+            appendMessage("You: " + message);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        messageField.setText("");
     }
 
     public void appendMessage(String message) {

@@ -146,13 +146,82 @@ public class XmlClientHandler implements Runnable {
                         writeXMLMessage(successDoc); // отправка только самому себе
                         break;
                     }
+                    case "whisper": {
+                        /*
+                        <command name=”whisper”>
+                            <session>UNIQUE_SESSION_ID</session>
+                            <target>USERNAME</target>
+                            <message>MESSAGE</message>
+                        </command>
+                        */
+                        // 1 - отправляем сообщение об успехе отправителю
+                        /*
+                        <success/>
+                         */
+//                        Document successDoc = createDocument();
+//                        Element successElem = successDoc.createElement("success");
+//                        successDoc.appendChild(successElem);
+//                        writeXMLMessage(successDoc);
+
+                        String target = root.getElementsByTagName("target").item(0).getTextContent();
+                        String body = root.getElementsByTagName("message").item(0).getTextContent();
+
+                        // 2 - ищу target в списке клиентов (есть или нет)
+                        XmlClientHandler targetClient = null;
+                        for (XmlClientHandler client : clients) {
+                            if (client.userName.equals(target)) {
+                                targetClient = client;
+                                break;
+                            }
+                        }
+
+                        if (targetClient == null) {
+                            // 3 - если не нашел - сообщение клиенту об ошибке
+                            /*
+                            <error><message>REASON</message></error>
+                             */
+                            Document errorDoc = createDocument();
+                            Element errorElem = errorDoc.createElement("error");
+                            Element messageElem = errorDoc.createElement("message");
+                            messageElem.setTextContent("Target not found");
+                            errorElem.appendChild(messageElem);
+                            errorDoc.appendChild(errorElem);
+
+                            writeXMLMessage(errorDoc);
+                        } else {
+                            // 4 - формируем и отправляем XML-сообщение
+                            /*
+                            <event name="whisper">
+                                <from>bob</from>
+                                <message>hello!!!</message>
+                            </event>
+                             */
+                            Document eventDoc = createDocument();
+                            Element eventElem = eventDoc.createElement("event");
+                            eventElem.setAttribute("name", "whisper");
+
+                            Element fromElem = eventDoc.createElement("from");
+                            fromElem.setTextContent(userName);
+                            eventElem.appendChild(fromElem);
+
+                            Element msgElem = eventDoc.createElement("message");
+                            msgElem.setTextContent(body);
+
+                            eventElem.appendChild(msgElem);
+                            eventDoc.appendChild(eventElem);
+
+                            // отправляю конкретному клиенту
+                            targetClient.writeXMLMessage(eventDoc);
+                        }
+
+                        break;
+                    }
                     case "logout": {
                         // <command name="logout"><session>...</session></command>
                         // отправляем успешный ответ: <success></success>
                         Document successDoc = createDocument();
                         Element successElem = successDoc.createElement("success");
                         successDoc.appendChild(successElem);
-
                         writeXMLMessage(successDoc);
 
                         // сообщаем другим клиентам, что клиент вышел

@@ -82,12 +82,16 @@ public class XmlChatClient {
                     Element root = doc.getDocumentElement(); // корневой элемент
                     String tagName = root.getTagName(); // название корневого элемента
                     if ("event".equals(tagName)) {
-                        // обработка разных событий от сервера
+                        // обработка разных событий отправленных от сервера клиенту
                         String eventName = root.getAttribute("name");
                         if ("message".equals(eventName)) {
                             String message = root.getElementsByTagName("message").item(0).getTextContent();
                             String from = root.getElementsByTagName("name").item(0).getTextContent();
                             gui.appendMessage(from + ": " + message);
+                        } else if ("whisper".equals(eventName)) {
+                            String from = root.getElementsByTagName("from").item(0).getTextContent();
+                            String msg  = root.getElementsByTagName("message").item(0).getTextContent();
+                            gui.appendMessage("[whisper] " + from + ": " + msg);
                         } else if ("userlogin".equals(eventName)) {
                             String name = root.getElementsByTagName("name").item(0).getTextContent();
                             gui.appendMessage("SERVER: " + name + " joined the chat.");
@@ -95,7 +99,8 @@ public class XmlChatClient {
                             String name = root.getElementsByTagName("name").item(0).getTextContent();
                             gui.appendMessage("SERVER: " + name + " left the chat.");
                         }
-                    } else if ("success".equals(tagName)) {
+                    }
+                    if ("success".equals(tagName)) {
                         // обработка ответов на команды
                         if (root.getElementsByTagName("listusers").getLength() > 0) {
                             // формирование строки со списком пользователей
