@@ -2,7 +2,6 @@ package task5.xml.server;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import task5.xml.client.XmlChatClient;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
@@ -31,18 +30,19 @@ public class XmlClientHandler implements Runnable {
             // 1 полученный объект - сообщение регистрации login
             Document doc = readXMLMessage();
             Element root = doc.getDocumentElement();
+            // <command name="login">
             if ("command".equals(root.getTagName()) &&
                     "login".equals(root.getAttribute("name"))) {
-                // извлекаем имя пользователя и тип клиента (для примера тип не обрабатываем)
+                // извлекаем имя пользователя и тип клиента
                 userName = root.getElementsByTagName("name").item(0).getTextContent();
-                // генерация сессионного идентификатора
-                String sessionId = UUID.randomUUID().toString(); // уникальный идентификатор сессии - UUID
+                // генерация уникального сессионного идентификатора
+                String sessionId = UUID.randomUUID().toString();
                 clients.add(this);
 
                 // сначала отправить <success> а уже после него выдать клиенту все накопленные события из истории
                 // отправляем ответ успешного логина с сессионным id:
                 /*
-                <success><session>UNIQUE_SESSION_ID</session></success>
+                <success><session>sessionId</session></success>
                  */
                 Document successDoc = createDocument();
                 Element successElem = successDoc.createElement("success");
@@ -51,7 +51,7 @@ public class XmlClientHandler implements Runnable {
                 successElem.appendChild(sessionElem);
                 successDoc.appendChild(successElem);
 
-                // 1 - отправляю ответ на логин (ответ - success) НОВОМУ клиенту
+                // 1 - отправляю ответ на сообщение о логине (success) НОВОМУ клиенту
                 writeXMLMessage(successDoc);
 
                 // 2 - отправляю всю историю новому клиенту
@@ -154,15 +154,6 @@ public class XmlClientHandler implements Runnable {
                             <message>MESSAGE</message>
                         </command>
                         */
-                        // 1 - отправляем сообщение об успехе отправителю
-                        /*
-                        <success/>
-                         */
-//                        Document successDoc = createDocument();
-//                        Element successElem = successDoc.createElement("success");
-//                        successDoc.appendChild(successElem);
-//                        writeXMLMessage(successDoc);
-
                         String target = root.getElementsByTagName("target").item(0).getTextContent();
                         String body = root.getElementsByTagName("message").item(0).getTextContent();
 
@@ -249,24 +240,25 @@ public class XmlClientHandler implements Runnable {
         }
     }
 
-    // чтение XML-сообщения: сначала 4 байта с длиной, затем само сообщение
     public Document readXMLMessage() throws Exception {
-        int length = dataIn.readInt();
+        int length = dataIn.readInt(); // читаем длину сообщения (первые 4 байта)
         byte[] data = new byte[length];
-        dataIn.readFully(data);
+        dataIn.readFully(data); // читаем само сообщение
         ByteArrayInputStream byteStream = new ByteArrayInputStream(data);
         DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         Document doc = builder.parse(byteStream);
         return doc;
     }
 
-    // запись XML-сообщения: сначала записывается длина сообщения, затем само сообщение
+    // отправка XML сообщкения ТЕКУЩЕМУ одному клиенту
     public void writeXMLMessage(Document doc) throws Exception {
+        // трансформация XML сообщения в массив байт
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
         StringWriter writer = new StringWriter();
         transformer.transform(new DOMSource(doc), new StreamResult(writer));
         byte[] data = writer.toString().getBytes(StandardCharsets.UTF_8);
 
+        // отправка по сетевому потоку
         dataOut.writeInt(data.length);
         dataOut.write(data);
         dataOut.flush();

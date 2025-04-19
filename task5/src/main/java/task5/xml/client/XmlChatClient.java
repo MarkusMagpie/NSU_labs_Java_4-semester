@@ -2,17 +2,16 @@ package task5.xml.client;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import task5.java_serialize.client.ChatClient; // для функции loadPortFromConfig
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import javax.swing.JOptionPane;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.*;
+import javax.xml.transform.stream.*;
 
 public class XmlChatClient {
     private Socket socket;
@@ -28,19 +27,28 @@ public class XmlChatClient {
             dataIn = new DataInputStream(socket.getInputStream());
             this.gui = gui;
 
-            // отправляем сообщение логина
-            Document loginDoc = createDocument();
+            // отправляем сообщение логина серверу
+            /*
+            <command name=”login”>
+	            <name>USER_NAME</name>
+	            <type>CHAT_CLIENT_NAME</type>
+            </command>
+             */
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document loginDoc = builder.newDocument();
             Element commandElem = loginDoc.createElement("command");
             commandElem.setAttribute("name", "login");
             Element nameElem = loginDoc.createElement("name");
             nameElem.setTextContent(userName);
             commandElem.appendChild(nameElem);
 
-            // добавил тип клиента
+            // тип клиента
             Element typeElem = loginDoc.createElement("type");
             typeElem.setTextContent("CHAT_CLIENT_XML");
             commandElem.appendChild(typeElem);
             loginDoc.appendChild(commandElem);
+
             writeXMLMessage(loginDoc);
 
             // жду ответ сервера ("success" или "error")
@@ -75,14 +83,13 @@ public class XmlChatClient {
     public void listenForMessages() {
         new Thread(() -> {
             try {
-                while (true) {
-                    Document doc = readXMLMessage();
-                    if (doc == null) break;
-
-                    Element root = doc.getDocumentElement(); // корневой элемент
-                    String tagName = root.getTagName(); // название корневого элемента
+                Document doc;
+                while ((doc = readXMLMessage()) != null) {
+                    // читаю названия корневого элемента сообщений отправленных от сервера клиенту
+                    // все сообщения от сервера имеют имя "event"
+                    Element root = doc.getDocumentElement();
+                    String tagName = root.getTagName();
                     if ("event".equals(tagName)) {
-                        // обработка разных событий отправленных от сервера клиенту
                         String eventName = root.getAttribute("name");
                         if ("message".equals(eventName)) {
                             String message = root.getElementsByTagName("message").item(0).getTextContent();
@@ -109,8 +116,7 @@ public class XmlChatClient {
                             for (int i = 0; i < listElem.getElementsByTagName("user").getLength(); i++) {
                                 Element userElem = (Element) listElem.getElementsByTagName("user").item(i);
                                 String name = userElem.getElementsByTagName("name").item(0).getTextContent();
-                                String type = userElem.getElementsByTagName("type").item(0).getTextContent();
-                                users.append(name).append(" (").append(type).append(")\n");
+                                users.append(name).append("\n");
                             }
                             gui.appendMessage(users.toString().trim());
                         } else {
@@ -130,30 +136,28 @@ public class XmlChatClient {
 
     // чтение XML-сообщения аналогично серверной реализации
     public Document readXMLMessage() throws Exception {
-        int length = dataIn.readInt();
+        int length = dataIn.readInt(); // чтение длины XML-сообщения
         byte[] data = new byte[length];
         // https://stackoverflow.com/questions/25897627/datainputstream-read-vs-datainputstream-readfully
         dataIn.readFully(data);
         ByteArrayInputStream byteStream = new ByteArrayInputStream(data);
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        return factory.newDocumentBuilder().parse(byteStream);
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document doc = builder.parse(byteStream);
+        return doc;
     }
 
     // запись XML-сообщения
     public void writeXMLMessage(Document doc) throws Exception {
+        // трансформация XML документа в массив байт
         Transformer transformer = TransformerFactory.newInstance().newTransformer();
         StringWriter writer = new StringWriter();
         transformer.transform(new DOMSource(doc), new StreamResult(writer));
         byte[] data = writer.toString().getBytes(StandardCharsets.UTF_8);
 
+        // отправка по сетевому потоку
         dataOut.writeInt(data.length);
         dataOut.write(data);
         dataOut.flush();
-    }
-
-    public Document createDocument() throws Exception {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        return factory.newDocumentBuilder().newDocument();
     }
 
     public void closeAll() {
@@ -168,9 +172,5 @@ public class XmlChatClient {
 
     public String getSessionId() {
         return sessionId;
-    }
-
-    public static String loadHostFromConfig() {
-        return ChatClient.loadHostFromConfig();
     }
 }

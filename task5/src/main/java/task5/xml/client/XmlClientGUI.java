@@ -2,13 +2,15 @@ package task5.xml.client;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import task5.xml.server.XmlChatServer;
 
 import javax.swing.*;
 import java.awt.*;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+
+import static task5.java_serialize.client.ChatClient.loadHostFromConfig;
+import static task5.java_serialize.server.ChatServer.loadPortFromConfig;
 
 public class XmlClientGUI {
     private final XmlChatClient client;
@@ -93,9 +95,9 @@ public class XmlClientGUI {
             }
 //                client.closeAll();
 //                System.exit(0);
-        } else if (message.toLowerCase().startsWith("/whisper ")) {
+        } else if (message.toLowerCase().startsWith("/whisper")) {
             try {
-                // message = ["/whisper", "TARGET", "BODY OF MESSAGE"]
+                // message = ["/whisper", "TARGET", "MESSAGE"]
                 /* XML-команда для секретной переписки с одним клиентом:
                 <command name=”whisper”>
                     <session>UNIQUE_SESSION_ID</session>
@@ -131,6 +133,7 @@ public class XmlClientGUI {
                 commandElem.appendChild(messageElem);
 
                 doc.appendChild(commandElem);
+                appendMessage("[whisper]: " + body + " to " + target);
 
                 client.sendXMLCommand(doc);
             } catch (Exception e) {
@@ -174,8 +177,8 @@ public class XmlClientGUI {
     public static void main(String[] args) {
         String userName = JOptionPane.showInputDialog("Enter your username for the XML chat:");
         if (userName != null) {
-            int port = XmlChatServer.loadPortFromConfig();
-            String serverHost = XmlChatClient.loadHostFromConfig();
+            int port = loadPortFromConfig();
+            String serverHost = loadHostFromConfig();
             new XmlClientGUI(userName, port, serverHost);
         } else {
             System.out.println("Name can't be null...");

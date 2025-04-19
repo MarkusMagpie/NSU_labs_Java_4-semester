@@ -1,5 +1,7 @@
 package task5.xml.server;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -7,12 +9,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import org.w3c.dom.Document;
 import task5.java_serialize.server.ChatServer;
 import static task5.java_serialize.server.ChatServer.loadLoggingFromConfig;
+import static task5.java_serialize.server.ChatServer.loadPortFromConfig;
 
 public class XmlChatServer {
     private static final Logger logger = LogManager.getLogger(ChatServer.class.getName());
@@ -58,10 +58,6 @@ public class XmlChatServer {
             log("No clients connected. Server shutting down...");
             System.exit(0);
         }
-    }
-
-    public static int loadPortFromConfig() {
-        return ChatServer.loadPortFromConfig();
     }
 
     public static void log(String message) {
