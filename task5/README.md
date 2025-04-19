@@ -1198,4 +1198,54 @@ public Document readXMLMessage() throws Exception {
    return factory.newDocumentBuilder().parse(byteStream);
 }
 ```
+описание метода записи XML-сообщения
+```java
+public void writeXMLMessage(Document doc) throws Exception {
+    // трансформация XML документа в массив байт
+    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+    StringWriter writer = new StringWriter();
+    transformer.transform(new DOMSource(doc), new StreamResult(writer));
+    byte[] data = writer.toString().getBytes(StandardCharsets.UTF_8);
+
+    // отправка по сетевому потоку
+    dataOut.writeInt(data.length);
+    dataOut.write(data);
+    dataOut.flush();
+}
+```
+```java
+Transformer transformer = TransformerFactory.newInstance().newTransformer();
+```
+Здесь мы получаем экземпляр `Transformer` из фабрики `TransformerFactory`. 
+По умолчанию этот трансформер выполняет «идентичное» преобразование: 
+берёт исходный XML (DOM) и выдаёт его в виде текстового потока без 
+изменений.
+```java
+StringWriter writer = new StringWriter();
+transformer.transform(new DOMSource(doc), new StreamResult(writer));
+```
+`new DOMSource(doc)` оборачивает наш `Document` (DOM-модель XML) в 
+источник для трансформации.  
+`new StreamResult(writer)` указывает, что результат трансформации нужно 
+записать в `StringWriter`.  
+В итоге в `writer` окажется строковое представление XML 
+(с заголовком <?xml ...?>, тегами и содержимым).
+```java
+byte[] data = writer.toString().getBytes(StandardCharsets.UTF_8);
+```
+Метод `toString()` возвращает всю XML‑строку, а `getBytes(UTF_8)` 
+конвертирует её в массив байтов в кодировке UTF‑8.
+```java
+dataOut.writeInt(data.length);
+```
+`DataOutputStream.writeInt(int)` пишет в поток четыре байта, 
+представляющие целое число (длину массива).  
+```java
+dataOut.write(data);
+dataOut.flush();
+```
+`write(byte[])` записывает байты XML‑сообщения сразу за длиной.  
+`flush()` гарантирует, что все данные из буфера будут 
+отправлены по сети, а не задержатся в памяти до заполнения буфера 
+или закрытия потока.
 ### акпкп
